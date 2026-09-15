@@ -206,6 +206,22 @@
       inset 0 1px 0 rgba(255,255,255,0.12),
       0 8px 32px rgba(0,0,0,0.35);
     position: relative;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: grab;
+  }
+
+  .navbar.dragging {
+    cursor: grabbing;
+  }
+
+  .navbar.dragging .nav-indicator {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.3),
+      inset 0 -6px 14px rgba(34, 211, 238, 0.22),
+      0 4px 16px rgba(34, 211, 238, 0.35);
   }
 
   .nav-indicator {
@@ -234,6 +250,10 @@
     inset: 0;
     background: linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%);
     mix-blend-mode: overlay;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-indicator { transition: none; }
   }
 
   .nav-item {
@@ -365,19 +385,107 @@
     return nav.querySelector('.nav-item.active') || items[0];
   }
 
-  items.forEach(item => {
-    item.addEventListener('click', () => {
-      items.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      moveIndicator(item);
+  function setActive(item) {
+    items.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  }
+
+  function setIndicatorX(leftPx) {
+    indicator.style.transform = `translateX(${leftPx}px)`;
+  }
+
+  function indicatorBounds(widthPx) {
+    const first = items[0];
+    const last = items[items.length - 1];
+    return {
+      min: first.offsetLeft - 6,
+      max: (last.offsetLeft + last.offsetWidth) - widthPx - 6
+    };
+  }
+
+  function nearestItemToX(leftPx, widthPx) {
+    const pillCenter = leftPx + 6 + widthPx / 2;
+    let best = items[0];
+    let bestDist = Infinity;
+    items.forEach(item => {
+      const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+      const dist = Math.abs(itemCenter - pillCenter);
+      if (dist < bestDist) { bestDist = dist; best = item; }
     });
-  });
+    return best;
+  }
+
+  let dragState = null;
+
+  function onPointerDown(e) {
+    if (dragState) return;
+    const downTarget = e.target.closest('.nav-item') || activeItem();
+    nav.setPointerCapture(e.pointerId);
+    dragState = {
+      pointerId: e.pointerId,
+      startClientX: e.clientX,
+      moved: false,
+      baseLeft: 0,
+      width: 0,
+      liveActive: activeItem(),
+      downTarget
+    };
+  }
+
+  function onPointerMove(e) {
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    const dx = e.clientX - dragState.startClientX;
+
+    if (!dragState.moved) {
+      if (Math.abs(dx) < 6) return;
+      dragState.moved = true;
+      const navRect = nav.getBoundingClientRect();
+      const indRect = indicator.getBoundingClientRect();
+      dragState.baseLeft = indRect.left - navRect.left - 6;
+      dragState.width = indRect.width;
+      nav.classList.add('dragging');
+      indicator.style.transition = 'none';
+      indicator.style.width = dragState.width + 'px';
+    }
+
+    const { min, max } = indicatorBounds(dragState.width);
+    const left = Math.max(min, Math.min(max, dragState.baseLeft + dx));
+    setIndicatorX(left);
+
+    const nearest = nearestItemToX(left, dragState.width);
+    if (nearest !== dragState.liveActive) {
+      dragState.liveActive = nearest;
+      setActive(nearest);
+    }
+  }
+
+  function endDrag(e) {
+    if (!dragState || e.pointerId !== dragState.pointerId) return;
+    nav.releasePointerCapture(e.pointerId);
+    nav.classList.remove('dragging');
+
+    if (!dragState.moved) {
+      const tapTarget = dragState.downTarget;
+      setActive(tapTarget);
+      moveIndicator(tapTarget);
+    } else {
+      setActive(dragState.liveActive);
+      indicator.style.transition = '';
+      moveIndicator(dragState.liveActive);
+    }
+    dragState = null;
+  }
+
+  nav.addEventListener('pointerdown', onPointerDown);
+  nav.addEventListener('pointermove', onPointerMove);
+  nav.addEventListener('pointerup', endDrag);
+  nav.addEventListener('pointercancel', endDrag);
 
   window.addEventListener('load', () => moveIndicator(activeItem(), true));
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => moveIndicator(activeItem(), true));
   }
-  window.addEventListener('resize', () => moveIndicator(activeItem(), true));
+  window.addEventListener('resize', () => { if (!dragState) moveIndicator(activeItem(), true); });
 </script>
 </body>
 </html>
