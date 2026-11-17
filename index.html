@@ -5,9 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Juan Esteban Ruiz Ome — Ingeniero de Software</title>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
+
+<a class="hv-fab" href="assets/hv-juan-esteban-ruiz-ome.pdf" download data-hv>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+  <span data-i18n="hvFab">Descargar HV</span>
+</a>
 
 <div class="lang-switch" id="langSwitch">
   <button class="lang-btn" data-lang="es">ES</button>
@@ -17,34 +22,35 @@
 <div class="navbar-wrap">
   <nav class="navbar" id="navbar">
     <div class="nav-indicator" id="nav-indicator"></div>
-    <button class="nav-item active" data-idx="0" data-panel="inicio">
+    <button class="nav-item active" data-idx="0" data-target="inicio">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
       <span class="nav-label" data-i18n="nav.inicio">Inicio</span>
     </button>
-    <button class="nav-item" data-idx="1" data-panel="experiencia">
+    <button class="nav-item" data-idx="1" data-target="experiencia">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
       <span class="nav-label" data-i18n="nav.experiencia">Experiencia</span>
     </button>
-    <button class="nav-item" data-idx="2" data-panel="proyectos">
+    <button class="nav-item" data-idx="2" data-target="proyectos">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="nav-label" data-i18n="nav.proyectos">Proyectos</span>
     </button>
-    <button class="nav-item" data-idx="3" data-panel="stack">
+    <button class="nav-item" data-idx="3" data-target="stack">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
       <span class="nav-label" data-i18n="nav.stack">Stack</span>
     </button>
-    <button class="nav-item" data-idx="4" data-panel="contacto">
+    <button class="nav-item" data-idx="4" data-target="contacto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
       <span class="nav-label" data-i18n="nav.contacto">Contacto</span>
     </button>
   </nav>
 </div>
 
-<div class="hero" id="hero">
+<main>
+<section class="hero" id="inicio" data-section>
   <div class="content">
     <div class="eyebrow" data-i18n="hero.eyebrow">Cali, Colombia — Ing. de Sistemas, Icesi</div>
     <h1 class="name">Juan Esteban<br>Ruiz Ome</h1>
-    <div class="role" data-i18n="hero.rol">Ingeniero de Software — IA y Automatización</div>
+    <div class="role" data-i18n="hero.rol">Agentes de IA, RAG y Desarrollo Backend</div>
     <div class="desc" data-i18n="hero.bio">
       Construyo sistemas que llegan a producción, no que se quedan en demo.
     </div>
@@ -55,30 +61,57 @@
     </div>
 
     <div class="cta-row">
-      <button class="btn btn-primary" data-open-panel="proyectos" data-i18n="hero.ctaProyectos">Ver proyectos</button>
-      <a class="btn btn-ghost" href="assets/hv-juan-esteban-ruiz-ome.pdf" download data-i18n="hero.ctaHv">Descargar HV</a>
-      <button class="btn btn-ghost" data-open-panel="contacto" data-i18n="hero.ctaContacto">Contacto</button>
+      <a class="btn btn-primary btn-icon" href="assets/hv-juan-esteban-ruiz-ome.pdf" download data-hv>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        <span data-i18n="hero.ctaHv">Descargar HV</span>
+      </a>
+      <a class="btn btn-ghost" href="#proyectos" data-scroll-to="proyectos" data-i18n="hero.ctaProyectos">Ver proyectos</a>
+      <a class="btn btn-ghost" href="#contacto" data-scroll-to="contacto" data-i18n="hero.ctaContacto">Contacto</a>
     </div>
 
     <div class="signals" id="signals"></div>
   </div>
 
   <div class="photo-wrap">
-    <div class="photo-frame">
+    <button class="photo-frame" type="button" id="pitchBtn" data-open-pitch>
       <span class="frame-reveal"></span>
       <img src="assets/me.png" alt="Juan Esteban Ruiz Ome">
-    </div>
+      <span class="photo-play">
+        <span class="photo-play-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
+        <span class="photo-play-label" data-i18n="hero.verPitch">Ver mi pitch</span>
+      </span>
+    </button>
     <div class="corner-tag"><span class="live-dot"></span><span data-i18n="hero.fotoTag">Cali, CO</span></div>
   </div>
+
+  <a class="scroll-hint" href="#experiencia" data-scroll-to="experiencia" aria-label="Experiencia">
+    <span data-i18n="scrollHint">Desliza</span>
+    <span class="scroll-hint-line"></span>
+  </a>
+</section>
+
+<section class="section" id="experiencia" data-section></section>
+<section class="section" id="proyectos" data-section></section>
+<section class="section" id="stack" data-section></section>
+<section class="section section-last" id="contacto" data-section></section>
+</main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="lb-btn lb-close" id="lbClose" aria-label="Close">✕</button>
+  <button class="lb-btn lb-prev" id="lbPrev" aria-label="Previous">‹</button>
+  <figure class="lb-figure">
+    <img id="lbImg" alt="">
+    <figcaption id="lbCaption"></figcaption>
+  </figure>
+  <button class="lb-btn lb-next" id="lbNext" aria-label="Next">›</button>
 </div>
 
-<div class="panel-backdrop" id="panelBackdrop"></div>
-<div class="panel" id="panel" role="dialog" aria-modal="true">
-  <button class="panel-close" id="panelClose" aria-label="Close">✕</button>
-  <div class="panel-inner" id="panelInner"></div>
+<div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="lb-btn lb-close" id="videoClose" aria-label="Close">✕</button>
+  <div class="video-frame" id="videoFrame"></div>
 </div>
 
-<script src="content.js"></script>
-<script src="app.js"></script>
+<script src="content.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
