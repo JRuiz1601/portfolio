@@ -38,10 +38,21 @@ function applyI18n(root = document) {
 }
 
 // ---------- logos e iconos ----------
+// Logos multicolor (p. ej. Gemini): sus degradados viven una sola vez en un <svg> oculto
+// y cada instancia los referencia, así no se repiten ids en la página.
+(function mountLogoDefs() {
+  const defs = Object.values(LOGOS).map(l => (l.svg && (l.svg.match(/<defs>[\s\S]*?<\/defs>/) || [''])[0]) || '').join('');
+  if (!defs) return;
+  const holder = document.createElement('div');
+  holder.innerHTML = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">${defs}</svg>`;
+  document.body.prepend(holder.firstChild);
+})();
+
 function logoSvg(slug, cls = 'logo') {
   const l = LOGOS[slug];
   if (!l) return '';
-  return `<svg class="${cls}" viewBox="0 0 24 24" role="img" aria-label="${l.t}" style="--brand:${l.c}"><path d="${l.d}" fill="currentColor"/></svg>`;
+  const body = l.svg ? l.svg.replace(/<defs>[\s\S]*?<\/defs>/, '') : `<path d="${l.d}" fill="currentColor"/>`;
+  return `<svg class="${cls}" viewBox="0 0 24 24" role="img" aria-label="${l.t}" style="--brand:${l.c}">${body}</svg>`;
 }
 
 function slugFor(item) {
