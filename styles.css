@@ -2068,3 +2068,59 @@ body.lb-open { overflow: hidden; }
   transition: opacity 0.6s var(--ease);
 }
 .page-veil.on { opacity: 1; transition-duration: 0.36s; }
+
+/* ---------- evidencia: certificado del Global Hack ---------- */
+.cert-btn {
+  margin-top: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 20px 8px 8px;
+  border: 1px solid rgba(251, 230, 204, 0.18);
+  border-radius: 999px;
+  background: rgba(251, 230, 204, 0.08);
+  color: var(--cream);
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: zoom-in;
+  transition: transform 0.45s var(--spring), background 0.3s var(--ease);
+}
+.cert-thumb {
+  width: 58px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  rotate: -4deg;
+  transition: rotate 0.45s var(--spring);
+}
+.cert-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cert-arrow { color: var(--sky); transition: transform 0.45s var(--spring); }
+.cert-btn:hover { transform: translateY(-2px); background: rgba(251, 230, 204, 0.14); }
+.cert-btn:hover .cert-thumb { rotate: 0deg; }
+.cert-btn:hover .cert-arrow { transform: translate(2px, -2px); }
+.cert-btn:focus-visible, .cert-link:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--sky); }
+.cert-link {
+  display: inline-block;
+  margin-top: 10px;
+  margin-left: 8px;
+  padding: 3px 4px;
+  border: none;
+  background: none;
+  color: var(--sky);
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: zoom-in;
+  text-decoration: underline;
+  text-decoration-color: rgba(147, 179, 219, 0.4);
+  text-underline-offset: 3px;
+}
+
+/* JR del pie de página más visible en celular */
+@media (max-width: 720px) {
+  .footer-card { min-height: 260px; }
+  .footer-jr { font-size: 240px; right: 14px; bottom: -28px; }
+}

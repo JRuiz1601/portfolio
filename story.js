@@ -120,6 +120,11 @@ const STORY = {
   franja: { es: "Con lo que construyo", en: "What I build with" },
   franjaLogos: ["nestjs", "postgresql", "nextdotjs", "docker", "python", "n8n", "supabase", "redis", "googlegemini", "claude", "prisma", "typescript", "githubactions", "scikitlearn", "traefikproxy", "react", "django", "springboot", "minio", "jira"],
 
+  certificado: {
+    src: "img/certificado-global-hack-2025.webp",
+    alt: { es: "Certificado de logro Global Hack 2025 — Global Seguros y Design Factory Javeriana", en: "Global Hack 2025 certificate of achievement — Global Seguros and Design Factory Javeriana" },
+    boton: { es: "Ver certificado", en: "View certificate" }
+  },
   hvCard: {
     kicker: { es: "Lo más pedido", en: "Most requested" },
     titulo: { es: "Mi hoja de vida, en una página", en: "My résumé, on one page" },
@@ -130,7 +135,7 @@ const STORY = {
     boton: { es: "Descargar PDF", en: "Download PDF" },
     idioma: { es: "en español", en: "in English" },
     otro: { es: "¿la necesitas en inglés?", en: "need it in Spanish?" },
-    preview: { es: "img/hv-es.webp", en: "img/hv-en.webp" },
+    preview: { es: "img/hv-es-v2.webp", en: "img/hv-en-v2.webp" },
     alt: { es: "Vista previa de la hoja de vida", en: "Résumé preview" }
   },
   pitchLink: { es: "O mira mi pitch en video", en: "Or watch my video pitch" },

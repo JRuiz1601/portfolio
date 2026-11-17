@@ -137,6 +137,7 @@ function renderExperiencia() {
       <div class="aside-title">${tField(l.titulo)}</div>
       <div class="aside-detail">${tField(l.detalle)}</div>
       <div class="aside-when">${l.año}</div>
+      ${i === 0 ? `<button class="cert-link" type="button" data-cert>${tField(STORY.certificado.boton)} ↗</button>` : ''}
     </div>
   `);
   const eduItem = `
@@ -439,6 +440,11 @@ function renderSignals() {
         <span class="highlight-kicker">${tField(m.destacadoKicker)}</span>
         <h3 class="highlight-title">Global Hack 2025</h3>
         <p class="highlight-detail">${tField(l.detalle)}</p>
+        <button class="cert-btn" type="button" data-cert>
+          <span class="cert-thumb"><img src="${STORY.certificado.src}" alt="" loading="lazy"></span>
+          <span>${tField(STORY.certificado.boton)}</span>
+          <span class="cert-arrow" aria-hidden="true">↗</span>
+        </button>
       </div>
     </article>`;
 }
@@ -512,6 +518,8 @@ function updateScrollFx() {
     if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) continue;
     let p;
     if (el.dataset.fx === 'through') p = (vh * 0.62 - r.top) / Math.max(1, r.height);
+    // "end": llega a 1 justo al final de la página (el pie de página nunca pasa más arriba)
+    else if (el.dataset.fx === 'end') p = 1 - (max - y) / (vh * 0.55);
     else p = (vh - r.top) / (vh * 0.75);
     el.style.setProperty('--p', Math.max(0, Math.min(1, p)).toFixed(4));
   }
@@ -617,6 +625,8 @@ function lbStep(dir) {
 }
 
 document.addEventListener('click', e => {
+  const cert = e.target.closest('[data-cert]');
+  if (cert) { lbOpen([{ src: STORY.certificado.src, alt: STORY.certificado.alt }], 0); return; }
   const slide = e.target.closest('.slide');
   if (!slide) return;
   const p = CONTENT.proyectos.lista[+slide.dataset.project];
