@@ -1,5 +1,5 @@
-// Capa narrativa de la variante "suave". Los datos (experiencia, proyectos, stack, contacto)
-// vienen de ../content.js; aquí solo vive el tono, los títulos de capítulo y los textos nuevos.
+// Capa narrativa del portafolio. Los datos (experiencia, proyectos, stack, contacto)
+// vienen de content.js; aquí solo vive el tono, los títulos de capítulo y los textos nuevos.
 const STORY = {
   marca: "Juan.",
 
@@ -84,12 +84,6 @@ const STORY = {
       en: "A department with 34 electives and students digging through scattered PDFs to pick a course. I built them an agent that answers for them, at any hour."
     }
   ],
-  // Ajustes al contenido compartido que solo aplican en esta variante
-  // (la versión clásica sigue leyendo ../content.js tal cual).
-  ajustarContenido(C) {
-    C.experiencia.trabajos[0].empresa = "FerreMundial";
-    C.proyectos.lista[1].contexto = { es: "Proyecto en solitario", en: "Solo project" };
-  },
   comoLoHice: { es: "Cómo lo hice", en: "How I did it" },
   tambien: { es: "Por el camino", en: "Along the way" },
 
@@ -140,6 +134,5 @@ const STORY = {
     alt: { es: "Vista previa de la hoja de vida", en: "Résumé preview" }
   },
   pitchLink: { es: "O mira mi pitch en video", en: "Or watch my video pitch" },
-  cierre: { es: "Hecho en Cali, con calma.", en: "Made in Cali, with calm." },
-  versionClasica: { es: "Ver versión clásica", en: "See classic version" }
+  cierre: { es: "Hecho en Cali, con calma.", en: "Made in Cali, with calm." }
 };

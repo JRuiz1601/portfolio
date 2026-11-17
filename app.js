@@ -1,3 +1,6 @@
+// Portafolio: renderizado narrativo por capítulos, navbar líquida, galerías, lightbox y pitch.
+// Datos: content.js · Tono: story.js · Logos: logos.js
+
 // ---------- i18n ----------
 let LANG = 'es';
 try { LANG = localStorage.getItem('lang') || 'es'; } catch (e) {}
@@ -14,68 +17,131 @@ function getPath(obj, path) {
   return path.split('.').reduce((o, k) => (o || {})[k], obj);
 }
 
+// Rutas de assets tal cual (antes la variante vivía una carpeta abajo y les anteponía ../)
+const asset = p => p;
+
 function applyI18n(root = document) {
   root.querySelectorAll('[data-i18n]').forEach(el => {
-    const val = getPath(CONTENT, el.getAttribute('data-i18n'));
-    el.textContent = tField(val);
+    const path = el.getAttribute('data-i18n');
+    const val = getPath(STORY, path) ?? getPath(CONTENT, path);
+    const text = tField(val);
+    if (text.includes('**')) {
+      const esc = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      el.innerHTML = esc.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    } else {
+      el.textContent = text;
+    }
   });
-  document.querySelectorAll('[data-hv]').forEach(a => a.setAttribute('href', tField(CONTENT.hvUrl)));
+  document.querySelectorAll('[data-hv]').forEach(a => a.setAttribute('href', asset(tField(CONTENT.hvUrl))));
   document.documentElement.lang = LANG;
   document.title = tField(CONTENT.meta.title);
 }
 
-// ---------- section renderers ----------
-function renderChips(list) {
-  return `<div class="chip-row">${list.map(s => `<span class="chip">${tField(s)}</span>`).join('')}</div>`;
+// ---------- logos e iconos ----------
+function logoSvg(slug, cls = 'logo') {
+  const l = LOGOS[slug];
+  if (!l) return '';
+  return `<svg class="${cls}" viewBox="0 0 24 24" role="img" aria-label="${l.t}" style="--brand:${l.c}"><path d="${l.d}" fill="currentColor"/></svg>`;
 }
 
-function sectionHead(c) {
+function slugFor(item) {
+  if (typeof item === 'string') return LOGO_FOR[item];
+  return LOGO_FOR[item.es] || LOGO_FOR[item.en];
+}
+
+function orgBadge(key, cls = 'org-badge') {
+  const o = key && STORY.orgs[key];
+  if (!o) return '';
+  return `<span class="${cls} org-${key}"><img src="${o.img}" alt="${o.nombre}" loading="lazy"></span>`;
+}
+
+const ICONS = {
+  receipt: '<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  chart: '<circle cx="7" cy="15" r="2.4"/><circle cx="16.5" cy="8" r="2.4"/><circle cx="17" cy="17" r="1.8"/><circle cx="9" cy="6.5" r="1.6"/>',
+  book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+  trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"/>',
+  pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  cap: '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
+  db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  plug: '<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+  nodes: '<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="19" r="2.5"/><path d="M7 7.5l3.5 9M17 7.5l-3.5 9M7.5 6h9"/>',
+  server: '<rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/><path d="M7 7h.01M7 17h.01"/>',
+  cube: '<path d="M21 16V8l-9-5-9 5v8l9 5z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  badge: '<circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 8 5-3 5 3-1.5-8"/>'
+};
+const icon = (name, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+
+// ---------- section renderers ----------
+function renderChips(list) {
+  return `<div class="chip-row">${list.map(s => {
+    const slug = slugFor(s);
+    return `<span class="chip${slug ? ' has-logo' : ''}">${slug ? logoSvg(slug, 'chip-logo') : ''}${tField(s)}</span>`;
+  }).join('')}</div>`;
+}
+
+// El JR de marca de agua (estilo "se desvanece"), reutilizable
+const ghostJR = (cls = '') => `<span class="ghost-jr ${cls}" aria-hidden="true"><span class="j">J</span><span class="r">R</span></span>`;
+
+// Capítulos que llevan el JR detrás: el que abre y el que cierra la historia
+const CHAPTERS_WITH_JR = ['experiencia', 'contacto'];
+
+function chapterHead(key) {
+  const c = STORY.capitulos[key];
+  const jr = CHAPTERS_WITH_JR.includes(key);
   return `
-    <header class="section-head reveal">
-      <span class="section-kicker">${c.kicker}</span>
-      <h2 class="section-title">${tField(c.titulo)}</h2>
+    <header class="chapter-head reveal${jr ? ' has-jr' : ''}"${jr ? ' data-fx="enter"' : ''}>
+      ${jr ? ghostJR('jr-chapter') : ''}
+      <span class="chapter-kicker">${tField(c.kicker)}</span>
+      <h2 class="chapter-title">${tField(c.titulo).split(' ').map((w, i) => `<span class="cw" style="--i:${i}">${w}</span>`).join(' ')}</h2>
+      <p class="chapter-intro">${tField(c.intro)}</p>
     </header>`;
 }
 
 function renderExperiencia() {
   const c = CONTENT.experiencia;
-  const jobs = c.trabajos.map(job => `
+  const jobs = c.trabajos.map((job, i) => `
     <article class="job reveal">
-      <div class="job-side">
-        <div class="job-periodo">${tField(job.periodo)}</div>
-        <div class="job-ubicacion">${tField(job.ubicacion)}</div>
-      </div>
-      <div class="job-main">
-        <div class="job-cargo">${tField(job.cargo)}</div>
-        <div class="job-empresa">${tField(job.empresa)}</div>
-        <ul class="job-logros">${job.logros.map(l => `<li>${tField(l)}</li>`).join('')}</ul>
+      <div class="job-rail">${orgBadge(STORY.trabajosOrg[i], 'job-logo') || '<span class="job-dot"></span>'}</div>
+      <div class="job-body">
+        <div class="job-when">${tField(job.periodo)} · ${tField(job.ubicacion)}</div>
+        <h3 class="job-title">${tField(job.cargo)} <span class="job-at">${LANG === 'en' ? 'at' : 'en'} ${tField(job.empresa)}</span></h3>
+        ${STORY.trabajosLead[i] ? `<p class="job-lead">${tField(STORY.trabajosLead[i])}</p>` : ''}
+        <details class="job-more">
+          <summary><span>${tField(STORY.comoLoHice)}</span><span class="job-more-icon" aria-hidden="true"></span></summary>
+          <ul class="job-logros">${job.logros.map(l => `<li>${tField(l)}</li>`).join('')}</ul>
+        </details>
         ${renderChips(job.stack)}
       </div>
     </article>
   `).join('');
 
   const edu = c.educacion;
-  const logros = c.logros.map(l => `
-    <div class="logro">
-      <div class="logro-titulo">${tField(l.titulo)} <span class="logro-anio">${l.año}</span></div>
-      <div class="logro-detalle">${tField(l.detalle)}</div>
+  const logroIcon = ['trophy', 'badge'];
+  const logros = c.logros.map((l, i) => `
+    <div class="aside-item reveal" style="--i:${i + 1}">
+      <span class="aside-icon">${icon(logroIcon[i] || 'badge')}</span>
+      <div class="aside-title">${tField(l.titulo)}</div>
+      <div class="aside-detail">${tField(l.detalle)}</div>
+      <div class="aside-when">${l.año}</div>
     </div>
-  `).join('');
+  `);
+  const eduItem = `
+        <div class="aside-item reveal" style="--i:0">
+          ${orgBadge('icesi', 'aside-icon aside-org')}
+          <div class="aside-title">${tField(edu.programa)}</div>
+          <div class="aside-detail">${edu.institucion}</div>
+          <div class="aside-when">${tField(edu.periodo)}</div>
+        </div>`;
 
   return `
-    ${sectionHead(c)}
-    <div class="jobs">${jobs}</div>
-    <div class="secondary-grid">
-      <div class="card-soft reveal">
-        <div class="sub-title">${tField(c.educacionTitulo)}</div>
-        <div class="edu-programa">${tField(edu.programa)}</div>
-        <div class="edu-institucion">${edu.institucion}</div>
-        <div class="edu-periodo">${tField(edu.periodo)}</div>
-      </div>
-      <div class="card-soft reveal">
-        <div class="sub-title">${tField(c.logrosTitulo)}</div>
-        <div class="logros-block">${logros}</div>
-      </div>
+    ${chapterHead('experiencia')}
+    <div class="timeline" data-fx="through"><span class="timeline-fill" aria-hidden="true"></span>${jobs}</div>
+    <div class="along reveal">
+      <div class="along-title">${tField(STORY.tambien)}</div>
+      ${rail([eduItem, ...logros], 'rail-grid rail-along')}
     </div>
   `;
 }
@@ -86,7 +152,7 @@ function renderGallery(p, pIdx) {
   const slides = p.media.map((m, i) => `
     <button class="slide" type="button" data-project="${pIdx}" data-media="${i}" aria-label="${tField(c.ampliar)}: ${tField(m.alt)}"
       style="${m.bg ? `background:${m.bg};` : ''}">
-      <img src="${m.src}" alt="${tField(m.alt)}" loading="lazy" decoding="async" class="${m.fit === 'contain' ? 'fit-contain' : ''}">
+      <img src="${asset(m.src)}" alt="${tField(m.alt)}" loading="lazy" decoding="async" class="${m.fit === 'contain' ? 'fit-contain' : ''}">
     </button>
   `).join('');
   const multi = p.media.length > 1;
@@ -103,92 +169,227 @@ function renderGallery(p, pIdx) {
       </div>
       ${multi ? `<div class="gallery-thumbs">${p.media.map((m, i) => `
         <button class="thumb${i === 0 ? ' on' : ''}${m.fit === 'contain' ? ' fit-contain' : ''}" type="button" data-thumb="${i}" aria-label="${tField(m.alt)}"${m.bg ? ` style="background:${m.bg}"` : ''}>
-          <img src="${m.src}" alt="" loading="lazy" decoding="async">
+          <img src="${asset(m.src)}" alt="" loading="lazy" decoding="async">
         </button>`).join('')}
       </div>` : ''}
     </div>`;
 }
 
+function renderLogoStage(slugs) {
+  if (!slugs || !slugs.length) return '';
+  return `
+    <div class="logo-stage" aria-hidden="true">
+      ${slugs.map((s, i) => `<span class="logo-orb" style="--i:${i}">${logoSvg(s, 'orb-logo')}<span class="orb-name">${LOGOS[s].t}</span></span>`).join('')}
+    </div>`;
+}
+
 function renderProyectos() {
   const c = CONTENT.proyectos;
-  const cards = c.lista.map((p, idx) => {
-    const hasMedia = p.media && p.media.length;
+  const s = STORY.pasos;
+  const featured = c.lista.map((p, idx) => [p, idx]).filter(([p]) => p.media && p.media.length);
+  const more = c.lista.map((p, idx) => [p, idx]).filter(([p]) => !(p.media && p.media.length));
+  const stories = featured.map(([p, idx]) => {
+    const hasMedia = true;
+    const org = STORY.proyectosOrg[idx];
+    const steps = [
+      ['problema', p.problema],
+      ['solucion', p.solucion],
+      ...(p.analitica ? [['analitica', p.analitica]] : []),
+      ['resultado', p.resultado]
+    ];
     return `
-    <article class="project-card reveal ${hasMedia ? '' : 'no-media'}">
-      ${renderGallery(p, idx)}
-      <div class="project-body">
-        <div class="project-meta">
-          <span class="project-context">${tField(p.contexto)}</span>
-          <span class="project-periodo">${tField(p.periodo)}</span>
+    <article class="story reveal ${hasMedia ? 'has-media' : 'no-media'}" data-fx="enter">
+      <div class="story-head">
+        <span class="story-num">${String(idx + 1).padStart(2, '0')}</span>
+        ${orgBadge(org, 'story-org')}
+        <div class="story-meta">
+          <span>${tField(p.contexto)}</span>
+          <span class="story-dot">·</span>
+          <span>${tField(p.periodo)}</span>
+          <span class="story-status">${tField(p.estado)}</span>
         </div>
-        <div class="project-head">
-          <h3 class="project-name">${tField(p.nombre)}</h3>
-          <div class="project-status">${tField(p.estado)}</div>
-        </div>
-        <p class="project-pitch">${tField(p.pitch)}</p>
-        <div class="project-details">
-          <div class="project-detail"><span class="project-detail-label">${tField(c.labels.problema)}</span>${tField(p.problema)}</div>
-          <div class="project-detail"><span class="project-detail-label">${tField(c.labels.solucion)}</span>${tField(p.solucion)}</div>
-          ${p.analitica ? `<div class="project-detail project-detail-highlight"><span class="project-detail-label">${tField(c.labels.analitica)}</span>${tField(p.analitica)}</div>` : ''}
-          <div class="project-detail"><span class="project-detail-label">${tField(c.labels.resultado)}</span>${tField(p.resultado)}</div>
-        </div>
-        ${renderChips(p.stack)}
-        ${(p.repo || p.demo) ? `<div class="project-links">
-          ${p.repo ? `<a class="project-link" href="https://${p.repo}" target="_blank" rel="noopener">${tField(c.verRepo)} ↗</a>` : ''}
-          ${p.demo ? `<a class="project-link" href="https://${p.demo}" target="_blank" rel="noopener">${tField(c.verDemo)} · ${p.demo} ↗</a>` : ''}
+      </div>
+      <h3 class="story-name">${tField(p.nombre)}</h3>
+      <p class="story-pitch">${tField(p.pitch)}</p>
+      ${hasMedia ? renderGallery(p, idx) : renderLogoStage(STORY.proyectosVisual[idx])}
+      ${rail(steps.map(([k, v], i) => `
+          <div class="step step-${k} reveal" style="--i:${i}">
+            <span class="step-label"><span class="step-n">${i + 1}</span>${tField(s[k])}</span>
+            <p>${tField(v)}</p>
+          </div>`), `rail-grid rail-steps steps-${steps.length}`)}
+      <div class="story-foot">
+        <div class="story-stack"><span class="story-stack-label">${tField(STORY.conQue)}</span>${renderChips(p.stack)}</div>
+        ${(p.repo || p.demo) ? `<div class="story-links">
+          ${p.repo ? `<a class="pill-link" href="https://${p.repo}" target="_blank" rel="noopener">${logoSvg('github', 'pill-logo')}${tField(c.verRepo)} ↗</a>` : ''}
+          ${p.demo ? `<a class="pill-link" href="https://${p.demo}" target="_blank" rel="noopener">${icon('globe', 'pill-logo')}${p.demo} ↗</a>` : ''}
         </div>` : ''}
       </div>
     </article>`;
   }).join('');
-  return `${sectionHead(c)}<div class="project-grid">${cards}</div>`;
+  const cards = more.map(([p, idx]) => `
+    <article class="mini-story">
+      <div class="mini-stage">${(STORY.proyectosVisual[idx] || []).map((sl, i) => `<span class="mini-orb" style="--i:${i}">${logoSvg(sl, 'mini-logo')}</span>`).join('')}</div>
+      <div class="mini-body">
+        <div class="mini-meta"><span class="story-num mini-num">${String(idx + 1).padStart(2, '0')}</span><span>${tField(p.contexto)} · ${tField(p.periodo)}</span></div>
+        <h4 class="mini-name">${tField(p.nombre)}</h4>
+        <p class="mini-pitch">${tField(p.pitch)}</p>
+        <div class="mini-result"><span class="step-label"><span class="step-n">✓</span>${tField(s.resultado)}</span><p>${tField(p.resultado)}</p></div>
+        ${renderChips(p.stack)}
+        ${p.repo ? `<a class="pill-link mini-link" href="https://${p.repo}" target="_blank" rel="noopener">${logoSvg('github', 'pill-logo')}${tField(c.verRepo)} ↗</a>` : ''}
+      </div>
+    </article>`);
+  const mas = STORY.masProyectos;
+  return `${chapterHead('proyectos')}<div class="stories">${stories}</div>
+    ${cards.length ? `<div class="more-projects reveal">
+      <div class="more-head">
+        <h3 class="more-title">${tField(mas.titulo)}</h3>
+        <p class="more-intro">${tField(mas.intro)}</p>
+      </div>
+      ${rail(cards, 'rail-projects')}
+    </div>` : ''}`;
+}
+
+// Carrusel horizontal (deslizar con el dedo, arrastrar con el mouse o usar las flechas)
+function rail(items, cls = '') {
+  return `
+    <div class="rail ${cls}" data-rail>
+      <div class="rail-track" tabindex="0">${items.join('')}</div>
+      <div class="rail-nav">
+        <span class="rail-hint">${tField(STORY.deslizar)} →</span>
+        <span class="rail-bar"><span class="rail-thumb"></span></span>
+        <button class="rail-btn prev" type="button" aria-label="${tField(STORY.anterior)}">‹</button>
+        <button class="rail-btn next" type="button" aria-label="${tField(STORY.siguiente)}">›</button>
+      </div>
+    </div>`;
+}
+
+function setupRails() {
+  document.querySelectorAll('[data-rail]').forEach(r => {
+    const track = r.querySelector('.rail-track');
+    const thumb = r.querySelector('.rail-thumb');
+    const prev = r.querySelector('.rail-btn.prev');
+    const next = r.querySelector('.rail-btn.next');
+    const step = () => {
+      const first = track.children[0];
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 16;
+      return first ? first.getBoundingClientRect().width + gap : track.clientWidth * 0.8;
+    };
+    const sync = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const ratio = track.clientWidth / Math.max(1, track.scrollWidth);
+      const pos = max > 0 ? track.scrollLeft / max : 0;
+      thumb.style.width = (ratio * 100) + '%';
+      thumb.style.left = (pos * (1 - ratio) * 100) + '%';
+      prev.disabled = track.scrollLeft < 4;
+      next.disabled = track.scrollLeft > max - 4;
+      r.classList.toggle('no-scroll', max <= 4);
+      r.classList.toggle('scrolled', track.scrollLeft > 4);
+    };
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: REDUCED_MOTION ? 'auto' : 'smooth' }));
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: REDUCED_MOTION ? 'auto' : 'smooth' }));
+    track.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+    window.addEventListener('resize', sync);
+
+    // arrastre con mouse en escritorio
+    let drag = null;
+    track.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, left: track.scrollLeft, moved: false };
+    });
+    window.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (!drag.moved && Math.abs(dx) < 6) return;
+      if (!drag.moved) { drag.moved = true; track.classList.add('dragging'); }
+      track.scrollLeft = drag.left - dx;
+    });
+    window.addEventListener('pointerup', () => {
+      if (!drag) return;
+      const moved = drag.moved;
+      drag = null;
+      track.classList.remove('dragging');
+      if (moved) track.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); }, { capture: true, once: true });
+    });
+    sync();
+  });
+}
+
+// Tecnologías sin logo de marca: un ícono de concepto según la palabra
+function conceptIcon(name) {
+  const n = name.toLowerCase();
+  if (/sql|datos|data|model/.test(n)) return 'db';
+  if (/api|integra/.test(n)) return 'plug';
+  if (/agente|agent/.test(n)) return 'spark';
+  if (/k-means|pca|forest/.test(n)) return 'chart';
+  if (/distribu|patron|patrón|pattern/.test(n)) return 'nodes';
+  if (/vps|despliegue|deploy/.test(n)) return 'server';
+  return 'cube';
 }
 
 function renderStack() {
   const c = CONTENT.stack;
   const groups = c.categorias.map(cat => `
-    <div class="stack-group card-soft reveal">
+    <div class="stack-group">
       <div class="stack-group-title">${tField(cat.nombre)}</div>
-      ${renderChips(cat.items)}
+      <div class="tiles">
+        ${cat.items.map((item, idx) => {
+          const slug = slugFor(item);
+          const name = tField(item);
+          return `<div class="tile${slug ? '' : ' tile-text'} reveal" style="--i:${idx}">
+            ${slug ? logoSvg(slug, 'tile-logo') : `<span class="tile-mono">${icon(conceptIcon(name))}</span>`}
+            <span class="tile-name">${name}</span>
+          </div>`;
+        }).join('')}
+      </div>
     </div>
-  `).join('');
-  return `${sectionHead(c)}<div class="stack-groups">${groups}</div>`;
+  `).join('<!--g-->');
+  return `${chapterHead('stack')}<div class="reveal">${rail(c.categorias.map((_, i) => groups.split('<!--g-->')[i]), 'rail-stack')}</div>`;
 }
 
 function renderContacto() {
   const c = CONTENT.contacto;
   const l = c.labels;
+  const h = STORY.hvCard;
+  const otherLang = LANG === 'es' ? 'en' : 'es';
+  let rowI = 0;
+  const row = (mark, label, value, href, ext) => {
+    const inner = `<span class="contact-mark">${mark}</span><span class="contact-text"><span class="contact-label">${label}</span><span class="contact-value">${value}</span></span>`;
+    rowI++;
+    return href
+      ? `<a class="contact-row reveal" style="--i:${rowI}" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ''}>${inner}<span class="contact-arrow" aria-hidden="true">↗</span></a>`
+      : `<div class="contact-row reveal" style="--i:${rowI}">${inner}</div>`;
+  };
   return `
-    ${sectionHead(c)}
-    <p class="contact-intro reveal">${tField(c.intro)}</p>
-    <div class="contact-grid reveal">
-      <a class="contact-item" href="mailto:${c.email}">
-        <span class="contact-label">${tField(l.email)}</span>
-        <span class="contact-value">${c.email}</span>
-      </a>
-      <a class="contact-item" href="tel:${c.telefono.replace(/\s/g, '')}">
-        <span class="contact-label">${tField(l.telefono)}</span>
-        <span class="contact-value">${c.telefono}</span>
-      </a>
-      <a class="contact-item" href="https://${c.linkedin}" target="_blank" rel="noopener">
-        <span class="contact-label">${tField(l.linkedin)}</span>
-        <span class="contact-value">${c.linkedin}</span>
-      </a>
-      <a class="contact-item" href="https://${c.github}" target="_blank" rel="noopener">
-        <span class="contact-label">${tField(l.github)}</span>
-        <span class="contact-value">${c.github}</span>
-      </a>
-      <div class="contact-item">
-        <span class="contact-label">${tField(l.ciudad)}</span>
-        <span class="contact-value">${c.ciudad}</span>
+    ${chapterHead('contacto')}
+
+    <a class="hv-hero reveal" data-fx="enter" href="${asset(tField(CONTENT.hvUrl))}" download data-hv>
+      <span class="hv-hero-text">
+        <span class="hv-hero-kicker">${tField(h.kicker)}</span>
+        <span class="hv-hero-title">${tField(h.titulo)}</span>
+        <span class="hv-hero-copy">${tField(h.texto)}</span>
+        <span class="hv-hero-btn">
+          <span class="hv-hero-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg></span>
+          ${tField(h.boton)} <span class="hv-hero-lang">· ${tField(h.idioma)}</span>
+        </span>
+      </span>
+      <span class="hv-hero-paper">
+        <img src="${tField(h.preview)}" alt="${tField(h.alt)}" loading="lazy">
+      </span>
+    </a>
+    <a class="hv-other reveal" href="${asset(CONTENT.hvUrl[otherLang])}" download>${tField(h.otro)} <span>${otherLang.toUpperCase()} ↓</span></a>
+
+    <div class="contact-layout">
+      <div class="contact-main reveal">
+        <a class="contact-email" href="mailto:${c.email}">${logoSvg('gmail', 'email-logo')}<span>${c.email}</span></a>
+        <div class="contact-grid">
+          ${row(logoSvg('whatsapp', 'mark-logo'), 'WhatsApp · ' + tField(l.telefono), c.telefono, `https://wa.me/${c.telefono.replace(/\D/g, '')}`, true)}
+          ${row(logoSvg('linkedin', 'mark-logo'), tField(l.linkedin), c.linkedin.replace('linkedin.com', ''), `https://${c.linkedin}`, true)}
+          ${row(logoSvg('github', 'mark-logo'), tField(l.github), c.github.replace('github.com/', '@'), `https://${c.github}`, true)}
+          ${row(logoSvg('youtube', 'mark-logo'), 'Pitch', tField(c.pitchLabel), c.pitchUrl, true).replace('<a class="contact-row', '<a data-open-pitch class="contact-row')}
+          ${row(icon('pin', 'mark-ico'), tField(l.ciudad), c.ciudad)}
+          ${row(icon('globe', 'mark-ico'), tField(l.idiomas), tField(c.idiomas))}
+        </div>
       </div>
-      <div class="contact-item">
-        <span class="contact-label">${tField(l.idiomas)}</span>
-        <span class="contact-value">${tField(c.idiomas)}</span>
-      </div>
-    </div>
-    <div class="contact-cta-row reveal">
-      <a class="btn btn-primary" href="${tField(CONTENT.hvUrl)}" download data-hv>${tField(c.ctaHv)}</a>
-      <a class="btn btn-ghost" href="${c.pitchUrl}" target="_blank" rel="noopener" data-open-pitch>▶ ${tField(c.pitchLabel)}</a>
     </div>
   `;
 }
@@ -206,17 +407,109 @@ function renderSections(markRevealed) {
   });
   setupReveal(markRevealed);
   setupGalleries();
+  setupRails();
+  refreshScrollFx();
 }
 
+// Un solo logro destacado (Global Hack), en vez de la fila de cifras
 function renderSignals() {
   const el = document.getElementById('signals');
-  el.innerHTML = CONTENT.hero.senales.map(s => `
-    <div>
-      <div class="signal-num">${s.num}</div>
-      <div class="signal-label">${tField(s.label)}</div>
-    </div>
-  `).join('');
+  const l = CONTENT.experiencia.logros[0];
+  const m = STORY.manifiesto;
+  el.innerHTML = `
+    <article class="highlight reveal" data-fx="enter">
+      <span class="highlight-glow" aria-hidden="true"></span>
+      <div class="highlight-side">
+        <span class="highlight-trophy">${icon('trophy')}</span>
+        <div class="highlight-num">3<sup>${LANG === 'en' ? 'rd' : '.er'}</sup></div>
+        <div class="highlight-place">${tField(m.destacadoPuesto)}</div>
+      </div>
+      <div class="highlight-body">
+        <span class="highlight-kicker">${tField(m.destacadoKicker)}</span>
+        <h3 class="highlight-title">Global Hack 2025</h3>
+        <p class="highlight-detail">${tField(l.detalle)}</p>
+      </div>
+    </article>`;
 }
+
+function renderMarquee() {
+  const el = document.getElementById('marquee');
+  if (!el) return;
+  const set = STORY.franjaLogos.map(s => `<span class="mq-item">${logoSvg(s, 'mq-logo')}<span>${LOGOS[s].t}</span></span>`).join('');
+  el.innerHTML = `<div class="mq-track"><div class="mq-set">${set}</div><div class="mq-set" aria-hidden="true">${set}</div></div>`;
+}
+
+// ---------- manifesto: las palabras se encienden mientras haces scroll ----------
+const manifestoEl = document.getElementById('manifestoText');
+let manifestoWords = [];
+let manifestoQueued = false;
+
+function renderManifesto() {
+  const norm = w => w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]/g, '');
+  const enfasis = new Set(STORY.manifiesto.enfasis.map(norm));
+  manifestoEl.innerHTML = tField(STORY.manifiesto.texto).split(/\s+/)
+    .map(w => `<span class="w${enfasis.has(norm(w)) ? ' em' : ''}">${w}</span>`).join(' ');
+  manifestoWords = Array.from(manifestoEl.querySelectorAll('.w'));
+  updateManifesto();
+}
+
+function updateManifesto() {
+  manifestoQueued = false;
+  if (!manifestoWords.length) return;
+  if (REDUCED_MOTION) { manifestoWords.forEach(w => w.classList.add('lit')); return; }
+  const r = manifestoEl.getBoundingClientRect();
+  const vh = window.innerHeight;
+  // 0 cuando el párrafo asoma por abajo, 1 cuando su final pasa por el 40% de la pantalla
+  const progress = Math.max(0, Math.min(1, (vh * 0.85 - r.top) / (r.height + vh * 0.45)));
+  const n = Math.round(progress * manifestoWords.length);
+  manifestoWords.forEach((w, i) => w.classList.toggle('lit', i < n));
+}
+
+window.addEventListener('scroll', () => {
+  if (!manifestoQueued) { manifestoQueued = true; requestAnimationFrame(updateManifesto); }
+}, { passive: true });
+window.addEventListener('resize', updateManifesto);
+
+// ---------- animaciones ligadas al scroll ----------
+// Cada elemento con data-fx recibe --p (0 → 1) según su posición en pantalla, y el CSS
+// traduce ese número en movimiento suave. Sin librerías: un solo rAF por frame.
+const fxRoot = document.documentElement;
+const heroEl = document.getElementById('inicio');
+let fxEls = [];
+let fxQueued = false;
+
+function refreshScrollFx() {
+  fxEls = Array.from(document.querySelectorAll('[data-fx]'));
+  updateScrollFx();
+}
+
+function updateScrollFx() {
+  fxQueued = false;
+  const vh = window.innerHeight;
+  const y = window.scrollY;
+  const max = Math.max(1, document.documentElement.scrollHeight - vh);
+  fxRoot.style.setProperty('--sy', y.toFixed(1));
+  fxRoot.style.setProperty('--read', (y / max).toFixed(4));
+  if (REDUCED_MOTION) { fxEls.forEach(el => el.style.setProperty('--p', 1)); return; }
+
+  const hh = heroEl.offsetHeight || vh;
+  // empieza cuando ya pasaste ~45% del inicio, para que se lea tranquilo
+  heroEl.style.setProperty('--hp', Math.max(0, Math.min(1, (y - hh * 0.45) / (hh * 0.5))).toFixed(4));
+
+  for (const el of fxEls) {
+    const r = el.getBoundingClientRect();
+    if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) continue;
+    let p;
+    if (el.dataset.fx === 'through') p = (vh * 0.62 - r.top) / Math.max(1, r.height);
+    else p = (vh - r.top) / (vh * 0.75);
+    el.style.setProperty('--p', Math.max(0, Math.min(1, p)).toFixed(4));
+  }
+}
+
+window.addEventListener('scroll', () => {
+  if (!fxQueued) { fxQueued = true; requestAnimationFrame(updateScrollFx); }
+}, { passive: true });
+window.addEventListener('resize', updateScrollFx);
 
 // ---------- scroll reveal ----------
 let revealObserver = null;
@@ -281,7 +574,7 @@ let lbReturnFocus = null;
 
 function lbShow() {
   const m = lbList[lbIndex];
-  lbImg.src = m.src;
+  lbImg.src = asset(m.src);
   lbImg.alt = tField(m.alt);
   lbCaption.textContent = `${tField(m.alt)}${lbList.length > 1 ? `  ·  ${lbIndex + 1}/${lbList.length}` : ''}`;
   lb.classList.toggle('single', lbList.length < 2);
@@ -388,17 +681,63 @@ function itemGeom(item) {
   return { left: item.offsetLeft - 6, width: item.offsetWidth };
 }
 
+// Píldora "líquida": cada borde sigue su objetivo con un resorte. El borde que va adelante
+// es más rápido que el de atrás, así la píldora se estira al moverse y se recoge al llegar.
+const pill = { l: null, r: null, vl: 0, vr: 0, tl: 0, tr: 0, raf: 0 };
+
+function renderPill() {
+  const w = Math.max(24, pill.r - pill.l);
+  const target = Math.max(24, pill.tr - pill.tl);
+  const stretch = Math.max(0, w / target - 1);
+  indicator.style.transform = `translateX(${pill.l.toFixed(2)}px)`;
+  indicator.style.width = w.toFixed(2) + 'px';
+  // al estirarse se adelgaza un poquito, como una gota
+  indicator.style.scale = `1 ${(1 - Math.min(0.12, stretch * 0.22)).toFixed(4)}`;
+  // el texto que queda debajo de la píldora se oscurece para leerse sobre el crema
+  const ol = pill.l + 6, or = pill.l + 6 + w;
+  for (const it of items) {
+    const c = it.offsetLeft + it.offsetWidth / 2;
+    it.classList.toggle('under', c > ol && c < or);
+  }
+}
+
+function pillStep() {
+  pill.raf = 0;
+  const dragging = nav.classList.contains('dragging');
+  const dir = Math.sign((pill.tl + pill.tr) - (pill.l + pill.r));
+  const lead = dragging ? 0.34 : 0.12;
+  const trail = dragging ? 0.26 : 0.06;
+  const damp = dragging ? 0.62 : 0.76;
+  const kl = dir > 0 ? trail : lead;
+  const kr = dir < 0 ? trail : lead;
+  pill.vl = (pill.vl + (pill.tl - pill.l) * kl) * damp;
+  pill.vr = (pill.vr + (pill.tr - pill.r) * kr) * damp;
+  pill.l += pill.vl;
+  pill.r += pill.vr;
+  const settled = Math.abs(pill.tl - pill.l) < 0.15 && Math.abs(pill.tr - pill.r) < 0.15 && Math.abs(pill.vl) < 0.05 && Math.abs(pill.vr) < 0.05;
+  if (settled) { pill.l = pill.tl; pill.r = pill.tr; pill.vl = pill.vr = 0; }
+  renderPill();
+  if (!settled) pill.raf = requestAnimationFrame(pillStep);
+}
+
 function setIndicator(left, width) {
-  indicator.style.transform = `translateX(${left}px)`;
-  if (width != null) indicator.style.width = width + 'px';
+  const w = width != null ? width : (pill.tr - pill.tl);
+  pill.tl = left;
+  pill.tr = left + w;
+  if (pill.l === null || REDUCED_MOTION) { snapPill(); return; }
+  if (!pill.raf) pill.raf = requestAnimationFrame(pillStep);
+}
+
+function snapPill() {
+  if (pill.raf) { cancelAnimationFrame(pill.raf); pill.raf = 0; }
+  pill.l = pill.tl; pill.r = pill.tr; pill.vl = pill.vr = 0;
+  renderPill();
 }
 
 function moveIndicator(el, instant) {
-  if (instant) indicator.style.transition = 'none';
-  else indicator.style.transition = '';
   const g = itemGeom(el);
   setIndicator(g.left, g.width);
-  if (instant) requestAnimationFrame(() => { indicator.style.transition = ''; });
+  if (instant) snapPill();
 }
 
 function activeItem() {
@@ -494,15 +833,80 @@ function releaseLock() {
   queueSpy();
 }
 
+// --- viaje suave entre secciones (en vez del scroll nativo, que es brusco y rápido) ---
+let glide = null; // { raf, done }
+const easeInOutCubic = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+const veil = document.getElementById('pageVeil');
+
+function cancelGlide() {
+  if (!glide) return;
+  cancelAnimationFrame(glide.raf);
+  clearTimeout(glide.timer);
+  if (veil) veil.classList.remove('on');
+  glide = null;
+}
+
+// Saltos largos: la página se funde a oscuro, salta cerca del destino y aparece
+// mientras recorre el último tramo despacio. Así no se ve un barrido borroso de miles de px.
+function travelTo(targetFn, done) {
+  const vh = window.innerHeight;
+  const d = targetFn() - window.scrollY;
+  if (REDUCED_MOTION || !veil || Math.abs(d) <= vh * 2.2) { glideTo(targetFn, done); return; }
+  cancelGlide();
+  const g = { raf: 0, timer: 0 };
+  glide = g;
+  veil.classList.add('on');
+  void veil.offsetWidth; // arranca el fundido ya, sin esperar al siguiente frame
+  g.timer = setTimeout(() => {
+    if (glide !== g) return;
+    const max = document.documentElement.scrollHeight - vh;
+    const pre = Math.max(0, Math.min(max, targetFn() - Math.sign(d) * vh * 0.6));
+    window.scrollTo({ top: pre, behavior: 'instant' });
+    glide = null;
+    glideTo(targetFn, done);
+    veil.classList.remove('on');
+  }, 440);
+}
+
+// targetFn devuelve el destino actual: se recalcula en cada frame por si algo cambia de alto en el camino.
+function glideTo(targetFn, done) {
+  cancelGlide();
+  const startY = window.scrollY;
+  const startTarget = targetFn();
+  const distance = Math.abs(startTarget - startY);
+  if (REDUCED_MOTION || distance < 2) {
+    window.scrollTo({ top: startTarget, behavior: 'instant' });
+    if (done) done();
+    return;
+  }
+  const duration = Math.max(700, Math.min(1800, 700 + distance * 0.35));
+  const t0 = performance.now();
+  const g = { raf: 0 };
+  glide = g;
+  const step = now => {
+    if (glide !== g) return;
+    const t = Math.min(1, (now - t0) / duration);
+    const target = targetFn();
+    window.scrollTo({ top: startY + (target - startY) * easeInOutCubic(t), behavior: 'instant' });
+    if (t < 1) { g.raf = requestAnimationFrame(step); return; }
+    glide = null;
+    if (done) done();
+  };
+  g.raf = requestAnimationFrame(step);
+}
+
 // User takes the wheel back mid-animation: hand control to the scroll-spy right away.
 ['wheel', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, e => {
-  if (!navLock) return;
+  if (!navLock && !glide) return;
   if (ev === 'touchstart' && nav.contains(e.target)) return;
   if (ev === 'keydown' && !['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) return;
+  cancelGlide();
   releaseLock();
 }, { passive: true }));
 
-if ('onscrollend' in window) window.addEventListener('scrollend', () => { if (navLock && !dragState) releaseLock(); });
+// Los scrollTo por frame del viaje disparan `scrollend`; mientras viaja no se suelta el bloqueo.
+if ('onscrollend' in window) window.addEventListener('scrollend', () => { if (navLock && !dragState && !glide) releaseLock(); });
 
 function goToSection(index, { fromDrag = false } = {}) {
   const item = items[index];
@@ -515,9 +919,8 @@ function goToSection(index, { fromDrag = false } = {}) {
   navLock = { index };
   if (distance < 2) { navLock.timer = setTimeout(releaseLock, 520); return; }
 
-  window.scrollTo({ top: y, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
-  // Fallback for browsers without `scrollend`.
-  navLock.timer = setTimeout(releaseLock, Math.min(1600, 450 + distance * 0.25));
+  const lock = navLock;
+  travelTo(() => sectionStops()[index], () => { if (navLock === lock) releaseLock(); });
   if (history.replaceState) history.replaceState(null, '', index === 0 ? location.pathname : '#' + sections[index].id);
 }
 
@@ -525,6 +928,7 @@ function goToSection(index, { fromDrag = false } = {}) {
 let scrub = null; // { target, raf }
 
 function scrubTo(y) {
+  cancelGlide();
   if (!scrub) scrub = { target: y, raf: 0 };
   scrub.target = y;
   if (scrub.raf) return;
@@ -593,8 +997,7 @@ function onPointerMove(e) {
     dragState.width = indRect.width;
     dragState.stops = sectionStops();
     nav.classList.add('dragging');
-    indicator.style.transition = 'none';
-    indicator.style.width = dragState.width + 'px';
+    pill.tr = pill.tl + dragState.width;
   }
 
   const { min, max } = indicatorBounds(dragState.width);
@@ -677,6 +1080,8 @@ function setLang(lang) {
   const offset = anchor.getBoundingClientRect().top;
   applyI18n();
   renderSignals();
+  renderMarquee();
+  renderManifesto();
   renderSections(true);
   window.scrollTo({ top: window.scrollY + anchor.getBoundingClientRect().top - offset, behavior: 'instant' });
   resync();
@@ -688,6 +1093,8 @@ langButtons.forEach(btn => btn.addEventListener('click', () => setLang(btn.datas
 langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === LANG));
 applyI18n();
 renderSignals();
+renderMarquee();
+renderManifesto();
 renderSections(false);
 
 if (location.hash) {

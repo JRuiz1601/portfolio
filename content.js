@@ -49,7 +49,7 @@ const CONTENT = {
     titulo: { es: "Experiencia", en: "Experience" },
     trabajos: [
       {
-        empresa: { es: "FerreMundial (negocio familiar)", en: "FerreMundial (family business)" },
+        empresa: "FerreMundial",
         cargo: { es: "Desarrollador de Software", en: "Software Developer" },
         periodo: { es: "ene. 2023 — presente", en: "Jan 2023 — present" },
         ubicacion: "Cali, Colombia",
@@ -165,7 +165,7 @@ const CONTENT = {
       },
       {
         nombre: { es: "Facturación Electrónica DIAN — FerreMundial", en: "DIAN Electronic Invoicing — FerreMundial" },
-        contexto: { es: "Negocio familiar · en solitario", en: "Family business · solo" },
+        contexto: { es: "Proyecto en solitario", en: "Solo project" },
         periodo: { es: "2023 — presente", en: "2023 — present" },
         pitch: {
           es: "Módulo de facturación electrónica y catálogo digital que integran la operación de una ferretería real con la DIAN.",
