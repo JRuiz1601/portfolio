@@ -15,8 +15,8 @@ const STORY = {
     eyebrow: { es: "Cali, Colombia · Ingeniería de Sistemas, Icesi", en: "Cali, Colombia · Systems Engineering, Icesi" },
     saludo: { es: "Hola, soy Juan Esteban.", en: "Hi, I'm Juan Esteban." },
     lead: {
-      es: "Construyo software que **sale de la demo y llega a la gente**: **facturas reales ante la DIAN**, **un agente que les responde a estudiantes** y **una plataforma que un equipo comercial usa cada día**.",
-      en: "I build software that **leaves the demo and reaches people**: **real invoices filed with Colombia's tax authority**, **an agent that answers students**, and **a platform a sales team uses every day**."
+      es: "Construyo software que sale de la demo y **llega a la gente**: facturas reales ante la **DIAN**, un **agente de IA** que les responde a estudiantes y una plataforma que un equipo comercial usa **cada día**.",
+      en: "I build software that leaves the demo and **reaches people**: real invoices filed with Colombia's **tax authority**, an **AI agent** that answers students, and a platform a sales team uses **every day**."
     },
     ctaHistoria: { es: "Empieza la historia", en: "Start the story" },
     ctaContacto: { es: "Escríbeme", en: "Write to me" },
