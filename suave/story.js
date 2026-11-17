@@ -97,10 +97,36 @@ const STORY = {
   },
   conQue: { es: "con qué", en: "built with" },
 
+  // Logos de organizaciones (imágenes locales en img/)
+  orgs: {
+    ferremundial: { img: "img/ferremundial-icon.png", nombre: "FerreMundial" },
+    icesi: { img: "img/icesi.png", nombre: "Universidad Icesi" }
+  },
+  trabajosOrg: ["ferremundial", "icesi"],
+  proyectosOrg: ["icesi", "ferremundial", "icesi", null, null],
+  // Para proyectos sin capturas: un escenario con los logos de lo que se usó
+  proyectosVisual: [null, null, null,
+    ["python", "mediapipe", "scikitlearn", "gradio"],
+    ["openjdk", "github"]
+  ],
+  // Iconos para las cifras (en orden con CONTENT.hero.senales)
+  numerosIcono: ["receipt", "chart", "book", "trophy"],
+
+  franja: { es: "con lo que construyo", en: "what i build with" },
+  franjaLogos: ["nestjs", "postgresql", "nextdotjs", "docker", "python", "n8n", "supabase", "redis", "googlegemini", "claude", "prisma", "typescript", "githubactions", "scikitlearn", "traefikproxy", "react", "django", "springboot", "minio", "jira"],
+
   hvCard: {
-    titulo: { es: "mi hoja de vida", en: "my résumé" },
-    sub: { es: "PDF · en español", en: "PDF · in English" },
-    accion: { es: "descargar", en: "download" }
+    kicker: { es: "lo más pedido", en: "most requested" },
+    titulo: { es: "mi hoja de vida, en una página", en: "my résumé, on one page" },
+    texto: {
+      es: "Experiencia, proyectos, stack y logros. Lista para imprimir o reenviar a tu equipo.",
+      en: "Experience, projects, stack and achievements. Ready to print or forward to your team."
+    },
+    boton: { es: "descargar PDF", en: "download PDF" },
+    idioma: { es: "en español", en: "in English" },
+    otro: { es: "¿la necesitas en inglés?", en: "need it in Spanish?" },
+    preview: { es: "img/hv-es.webp", en: "img/hv-en.webp" },
+    alt: { es: "Vista previa de la hoja de vida", en: "Résumé preview" }
   },
   pitchLink: { es: "o mira mi pitch en video", en: "or watch my video pitch" },
   cierre: { es: "hecho en cali, con calma.", en: "made in cali, with calm." },

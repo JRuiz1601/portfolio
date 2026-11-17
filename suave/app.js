@@ -1,5 +1,5 @@
 // Variante "suave": misma lógica de navegación, galerías, lightbox y pitch que ../app.js,
-// con renderizado narrativo por capítulos. Datos: ../content.js · Tono: story.js
+// con renderizado narrativo por capítulos. Datos: ../content.js · Tono: story.js · Logos: logos.js
 
 // ---------- i18n ----------
 let LANG = 'es';
@@ -31,9 +31,49 @@ function applyI18n(root = document) {
   document.title = tField(CONTENT.meta.title);
 }
 
+// ---------- logos e iconos ----------
+function logoSvg(slug, cls = 'logo') {
+  const l = LOGOS[slug];
+  if (!l) return '';
+  return `<svg class="${cls}" viewBox="0 0 24 24" role="img" aria-label="${l.t}" style="--brand:${l.c}"><path d="${l.d}" fill="currentColor"/></svg>`;
+}
+
+function slugFor(item) {
+  if (typeof item === 'string') return LOGO_FOR[item];
+  return LOGO_FOR[item.es] || LOGO_FOR[item.en];
+}
+
+function orgBadge(key, cls = 'org-badge') {
+  const o = key && STORY.orgs[key];
+  if (!o) return '';
+  return `<span class="${cls} org-${key}"><img src="${o.img}" alt="${o.nombre}" loading="lazy"></span>`;
+}
+
+const ICONS = {
+  receipt: '<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  chart: '<circle cx="7" cy="15" r="2.4"/><circle cx="16.5" cy="8" r="2.4"/><circle cx="17" cy="17" r="1.8"/><circle cx="9" cy="6.5" r="1.6"/>',
+  book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+  trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2z"/>',
+  pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  cap: '<path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
+  db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  plug: '<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+  nodes: '<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="19" r="2.5"/><path d="M7 7.5l3.5 9M17 7.5l-3.5 9M7.5 6h9"/>',
+  server: '<rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/><path d="M7 7h.01M7 17h.01"/>',
+  cube: '<path d="M21 16V8l-9-5-9 5v8l9 5z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  badge: '<circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 8 5-3 5 3-1.5-8"/>'
+};
+const icon = (name, cls = 'ico') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+
 // ---------- section renderers ----------
 function renderChips(list) {
-  return `<div class="chip-row">${list.map(s => `<span class="chip">${tField(s)}</span>`).join('')}</div>`;
+  return `<div class="chip-row">${list.map(s => {
+    const slug = slugFor(s);
+    return `<span class="chip${slug ? ' has-logo' : ''}">${slug ? logoSvg(slug, 'chip-logo') : ''}${tField(s)}</span>`;
+  }).join('')}</div>`;
 }
 
 function chapterHead(key) {
@@ -50,7 +90,7 @@ function renderExperiencia() {
   const c = CONTENT.experiencia;
   const jobs = c.trabajos.map((job, i) => `
     <article class="job reveal">
-      <div class="job-rail"><span class="job-dot"></span></div>
+      <div class="job-rail">${orgBadge(STORY.trabajosOrg[i], 'job-logo') || '<span class="job-dot"></span>'}</div>
       <div class="job-body">
         <div class="job-when">${tField(job.periodo)} · ${tField(job.ubicacion)}</div>
         <h3 class="job-title">${tField(job.cargo)} <span class="job-at">${LANG === 'en' ? 'at' : 'en'} ${tField(job.empresa)}</span></h3>
@@ -65,8 +105,10 @@ function renderExperiencia() {
   `).join('');
 
   const edu = c.educacion;
-  const logros = c.logros.map(l => `
+  const logroIcon = ['trophy', 'badge'];
+  const logros = c.logros.map((l, i) => `
     <div class="aside-item">
+      <span class="aside-icon">${icon(logroIcon[i] || 'badge')}</span>
       <div class="aside-title">${tField(l.titulo)}</div>
       <div class="aside-detail">${tField(l.detalle)}</div>
       <div class="aside-when">${l.año}</div>
@@ -80,6 +122,7 @@ function renderExperiencia() {
       <div class="along-title">${tField(STORY.tambien)}</div>
       <div class="along-grid">
         <div class="aside-item">
+          ${orgBadge('icesi', 'aside-icon aside-org')}
           <div class="aside-title">${tField(edu.programa)}</div>
           <div class="aside-detail">${edu.institucion}</div>
           <div class="aside-when">${tField(edu.periodo)}</div>
@@ -119,11 +162,20 @@ function renderGallery(p, pIdx) {
     </div>`;
 }
 
+function renderLogoStage(slugs) {
+  if (!slugs || !slugs.length) return '';
+  return `
+    <div class="logo-stage" aria-hidden="true">
+      ${slugs.map((s, i) => `<span class="logo-orb" style="--i:${i}">${logoSvg(s, 'orb-logo')}<span class="orb-name">${LOGOS[s].t}</span></span>`).join('')}
+    </div>`;
+}
+
 function renderProyectos() {
   const c = CONTENT.proyectos;
   const s = STORY.pasos;
   const stories = c.lista.map((p, idx) => {
     const hasMedia = p.media && p.media.length;
+    const org = STORY.proyectosOrg[idx];
     const steps = [
       ['problema', p.problema],
       ['solucion', p.solucion],
@@ -134,6 +186,7 @@ function renderProyectos() {
     <article class="story reveal ${hasMedia ? 'has-media' : 'no-media'}">
       <div class="story-head">
         <span class="story-num">${String(idx + 1).padStart(2, '0')}</span>
+        ${orgBadge(org, 'story-org')}
         <div class="story-meta">
           <span>${tField(p.contexto)}</span>
           <span class="story-dot">·</span>
@@ -143,7 +196,7 @@ function renderProyectos() {
       </div>
       <h3 class="story-name">${tField(p.nombre)}</h3>
       <p class="story-pitch">${tField(p.pitch)}</p>
-      ${renderGallery(p, idx)}
+      ${hasMedia ? renderGallery(p, idx) : renderLogoStage(STORY.proyectosVisual[idx])}
       <ol class="steps steps-${steps.length}">
         ${steps.map(([k, v], i) => `
           <li class="step step-${k}">
@@ -154,8 +207,8 @@ function renderProyectos() {
       <div class="story-foot">
         <div class="story-stack"><span class="story-stack-label">${tField(STORY.conQue)}</span>${renderChips(p.stack)}</div>
         ${(p.repo || p.demo) ? `<div class="story-links">
-          ${p.repo ? `<a class="pill-link" href="https://${p.repo}" target="_blank" rel="noopener">${tField(c.verRepo)} ↗</a>` : ''}
-          ${p.demo ? `<a class="pill-link" href="https://${p.demo}" target="_blank" rel="noopener">${p.demo} ↗</a>` : ''}
+          ${p.repo ? `<a class="pill-link" href="https://${p.repo}" target="_blank" rel="noopener">${logoSvg('github', 'pill-logo')}${tField(c.verRepo)} ↗</a>` : ''}
+          ${p.demo ? `<a class="pill-link" href="https://${p.demo}" target="_blank" rel="noopener">${icon('globe', 'pill-logo')}${p.demo} ↗</a>` : ''}
         </div>` : ''}
       </div>
     </article>`;
@@ -163,12 +216,33 @@ function renderProyectos() {
   return `${chapterHead('proyectos')}<div class="stories">${stories}</div>`;
 }
 
+// Tecnologías sin logo de marca: un ícono de concepto según la palabra
+function conceptIcon(name) {
+  const n = name.toLowerCase();
+  if (/sql|datos|data|model/.test(n)) return 'db';
+  if (/api|integra/.test(n)) return 'plug';
+  if (/agente|agent/.test(n)) return 'spark';
+  if (/k-means|pca|forest/.test(n)) return 'chart';
+  if (/distribu|patron|patrón|pattern/.test(n)) return 'nodes';
+  if (/vps|despliegue|deploy/.test(n)) return 'server';
+  return 'cube';
+}
+
 function renderStack() {
   const c = CONTENT.stack;
   const groups = c.categorias.map(cat => `
     <div class="stack-group reveal">
       <div class="stack-group-title">${tField(cat.nombre)}</div>
-      ${renderChips(cat.items)}
+      <div class="tiles">
+        ${cat.items.map(item => {
+          const slug = slugFor(item);
+          const name = tField(item);
+          return `<div class="tile${slug ? '' : ' tile-text'}">
+            ${slug ? logoSvg(slug, 'tile-logo') : `<span class="tile-mono">${icon(conceptIcon(name))}</span>`}
+            <span class="tile-name">${name}</span>
+          </div>`;
+        }).join('')}
+      </div>
     </div>
   `).join('');
   return `${chapterHead('stack')}<div class="stack-groups">${groups}</div>`;
@@ -177,38 +251,44 @@ function renderStack() {
 function renderContacto() {
   const c = CONTENT.contacto;
   const l = c.labels;
-  const row = (label, value, href, ext) => href
-    ? `<a class="contact-row" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ''}><span class="contact-label">${label}</span><span class="contact-value">${value}</span><span class="contact-arrow" aria-hidden="true">↗</span></a>`
-    : `<div class="contact-row"><span class="contact-label">${label}</span><span class="contact-value">${value}</span></div>`;
+  const h = STORY.hvCard;
+  const otherLang = LANG === 'es' ? 'en' : 'es';
+  const row = (mark, label, value, href, ext) => {
+    const inner = `<span class="contact-mark">${mark}</span><span class="contact-text"><span class="contact-label">${label}</span><span class="contact-value">${value}</span></span>`;
+    return href
+      ? `<a class="contact-row" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ''}>${inner}<span class="contact-arrow" aria-hidden="true">↗</span></a>`
+      : `<div class="contact-row">${inner}</div>`;
+  };
   return `
     ${chapterHead('contacto')}
+
+    <a class="hv-hero reveal" href="${asset(tField(CONTENT.hvUrl))}" download data-hv>
+      <span class="hv-hero-text">
+        <span class="hv-hero-kicker">${tField(h.kicker)}</span>
+        <span class="hv-hero-title">${tField(h.titulo)}</span>
+        <span class="hv-hero-copy">${tField(h.texto)}</span>
+        <span class="hv-hero-btn">
+          <span class="hv-hero-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg></span>
+          ${tField(h.boton)} <span class="hv-hero-lang">· ${tField(h.idioma)}</span>
+        </span>
+      </span>
+      <span class="hv-hero-paper">
+        <img src="${tField(h.preview)}" alt="${tField(h.alt)}" loading="lazy">
+      </span>
+    </a>
+    <a class="hv-other reveal" href="${asset(CONTENT.hvUrl[otherLang])}" download>${tField(h.otro)} <span>${otherLang.toUpperCase()} ↓</span></a>
+
     <div class="contact-layout">
       <div class="contact-main reveal">
-        <a class="contact-email" href="mailto:${c.email}">${c.email}</a>
-        <div class="contact-list">
-          ${row(tField(l.telefono), c.telefono, `tel:${c.telefono.replace(/\s/g, '')}`)}
-          ${row(tField(l.linkedin), c.linkedin, `https://${c.linkedin}`, true)}
-          ${row(tField(l.github), c.github, `https://${c.github}`, true)}
-          ${row(tField(l.ciudad), c.ciudad)}
-          ${row(tField(l.idiomas), tField(c.idiomas))}
+        <a class="contact-email" href="mailto:${c.email}">${logoSvg('gmail', 'email-logo')}<span>${c.email}</span></a>
+        <div class="contact-grid">
+          ${row(logoSvg('whatsapp', 'mark-logo'), 'WhatsApp · ' + tField(l.telefono), c.telefono, `https://wa.me/${c.telefono.replace(/\D/g, '')}`, true)}
+          ${row(logoSvg('linkedin', 'mark-logo'), tField(l.linkedin), c.linkedin.replace('linkedin.com', ''), `https://${c.linkedin}`, true)}
+          ${row(logoSvg('github', 'mark-logo'), tField(l.github), c.github.replace('github.com/', '@'), `https://${c.github}`, true)}
+          ${row(logoSvg('youtube', 'mark-logo'), 'Pitch', tField(c.pitchLabel), c.pitchUrl, true).replace('<a class="contact-row"', '<a class="contact-row" data-open-pitch')}
+          ${row(icon('pin', 'mark-ico'), tField(l.ciudad), c.ciudad)}
+          ${row(icon('globe', 'mark-ico'), tField(l.idiomas), tField(c.idiomas))}
         </div>
-      </div>
-      <div class="contact-side reveal">
-        <a class="hv-card" href="${asset(tField(CONTENT.hvUrl))}" download data-hv>
-          <span class="hv-card-sheet" aria-hidden="true"><span></span><span></span><span></span></span>
-          <span class="hv-card-text">
-            <span class="hv-card-title">${tField(STORY.hvCard.titulo)}</span>
-            <span class="hv-card-sub">${tField(STORY.hvCard.sub)}</span>
-          </span>
-          <span class="hv-card-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
-            <span class="sr-only">${tField(STORY.hvCard.accion)}</span>
-          </span>
-        </a>
-        <a class="pitch-link" href="${c.pitchUrl}" target="_blank" rel="noopener" data-open-pitch>
-          <span class="pitch-link-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
-          ${tField(STORY.pitchLink)}
-        </a>
       </div>
     </div>
   `;
@@ -231,12 +311,20 @@ function renderSections(markRevealed) {
 
 function renderSignals() {
   const el = document.getElementById('signals');
-  el.innerHTML = CONTENT.hero.senales.map(s => `
+  el.innerHTML = CONTENT.hero.senales.map((s, i) => `
     <div class="number reveal">
+      <span class="number-icon">${icon(STORY.numerosIcono[i] || 'badge')}</span>
       <div class="number-big">${s.num}</div>
       <div class="number-label">${tField(s.label)}</div>
     </div>
   `).join('');
+}
+
+function renderMarquee() {
+  const el = document.getElementById('marquee');
+  if (!el) return;
+  const set = STORY.franjaLogos.map(s => `<span class="mq-item">${logoSvg(s, 'mq-logo')}<span>${LOGOS[s].t}</span></span>`).join('');
+  el.innerHTML = `<div class="mq-track"><div class="mq-set">${set}</div><div class="mq-set" aria-hidden="true">${set}</div></div>`;
 }
 
 // ---------- manifesto: las palabras se encienden mientras haces scroll ----------
@@ -729,6 +817,7 @@ function setLang(lang) {
   const offset = anchor.getBoundingClientRect().top;
   applyI18n();
   renderSignals();
+  renderMarquee();
   renderManifesto();
   renderSections(true);
   window.scrollTo({ top: window.scrollY + anchor.getBoundingClientRect().top - offset, behavior: 'instant' });
@@ -741,6 +830,7 @@ langButtons.forEach(btn => btn.addEventListener('click', () => setLang(btn.datas
 langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === LANG));
 applyI18n();
 renderSignals();
+renderMarquee();
 renderManifesto();
 renderSections(false);
 
