@@ -1855,3 +1855,39 @@ body.lb-open { overflow: hidden; }
   .chapter-title .cw { opacity: 1; translate: none; filter: none; }
   .btn-hv::after { animation: none; }
 }
+
+/* ---------- JR de marca de agua en más lugares (estilo "se desvanece") ---------- */
+.ghost-jr {
+  position: absolute;
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.13em;
+  padding-right: 0.13em;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 25%, transparent 92%);
+}
+.ghost-jr .j { color: rgba(147, 179, 219, 0.2); }
+.ghost-jr .r { color: rgba(251, 230, 204, 0.16); }
+
+/* detrás del título del capítulo 01 y del 04: abre y cierra la historia */
+.chapter-head.has-jr { position: relative; }
+.chapter-head.has-jr > :not(.ghost-jr) { position: relative; z-index: 1; }
+.jr-chapter {
+  right: -30px;
+  top: -40px;
+  font-size: 440px;
+  z-index: 0;
+  translate: 0 calc((1 - var(--p, 1)) * 140px);
+  opacity: calc(0.25 + 0.75 * var(--p, 1));
+}
+.chapter-head.has-jr { max-width: none; }
+.chapter-head.has-jr .chapter-title, .chapter-head.has-jr .chapter-intro { max-width: 900px; }
+#experiencia, #contacto { overflow-x: clip; }
+
+@media (max-width: 720px) {
+  .jr-chapter { font-size: 260px; right: -60px; top: -10px; }
+}

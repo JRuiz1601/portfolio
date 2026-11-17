@@ -76,10 +76,18 @@ function renderChips(list) {
   }).join('')}</div>`;
 }
 
+// El JR de marca de agua (estilo "se desvanece"), reutilizable
+const ghostJR = (cls = '') => `<span class="ghost-jr ${cls}" aria-hidden="true"><span class="j">J</span><span class="r">R</span></span>`;
+
+// Capítulos que llevan el JR detrás: el que abre y el que cierra la historia
+const CHAPTERS_WITH_JR = ['experiencia', 'contacto'];
+
 function chapterHead(key) {
   const c = STORY.capitulos[key];
+  const jr = CHAPTERS_WITH_JR.includes(key);
   return `
-    <header class="chapter-head reveal">
+    <header class="chapter-head reveal${jr ? ' has-jr' : ''}"${jr ? ' data-fx="enter"' : ''}>
+      ${jr ? ghostJR('jr-chapter') : ''}
       <span class="chapter-kicker">${tField(c.kicker)}</span>
       <h2 class="chapter-title">${tField(c.titulo).split(' ').map((w, i) => `<span class="cw" style="--i:${i}">${w}</span>`).join(' ')}</h2>
       <p class="chapter-intro">${tField(c.intro)}</p>
