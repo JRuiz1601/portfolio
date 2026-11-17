@@ -103,7 +103,7 @@ const STORY = {
 
   // Logos de organizaciones (imágenes locales en img/)
   orgs: {
-    ferremundial: { img: "img/ferremundial-icon.png", nombre: "FerreMundial" },
+    ferremundial: { img: "img/ferremundial-emblema.png", nombre: "FerreMundial" },
     icesi: { img: "img/icesi.png", nombre: "Universidad Icesi" }
   },
   trabajosOrg: ["ferremundial", "icesi"],
