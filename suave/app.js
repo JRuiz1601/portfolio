@@ -684,17 +684,63 @@ function itemGeom(item) {
   return { left: item.offsetLeft - 6, width: item.offsetWidth };
 }
 
+// Píldora "líquida": cada borde sigue su objetivo con un resorte. El borde que va adelante
+// es más rápido que el de atrás, así la píldora se estira al moverse y se recoge al llegar.
+const pill = { l: null, r: null, vl: 0, vr: 0, tl: 0, tr: 0, raf: 0 };
+
+function renderPill() {
+  const w = Math.max(24, pill.r - pill.l);
+  const target = Math.max(24, pill.tr - pill.tl);
+  const stretch = Math.max(0, w / target - 1);
+  indicator.style.transform = `translateX(${pill.l.toFixed(2)}px)`;
+  indicator.style.width = w.toFixed(2) + 'px';
+  // al estirarse se adelgaza un poquito, como una gota
+  indicator.style.scale = `1 ${(1 - Math.min(0.12, stretch * 0.22)).toFixed(4)}`;
+  // el texto que queda debajo de la píldora se oscurece para leerse sobre el crema
+  const ol = pill.l + 6, or = pill.l + 6 + w;
+  for (const it of items) {
+    const c = it.offsetLeft + it.offsetWidth / 2;
+    it.classList.toggle('under', c > ol && c < or);
+  }
+}
+
+function pillStep() {
+  pill.raf = 0;
+  const dragging = nav.classList.contains('dragging');
+  const dir = Math.sign((pill.tl + pill.tr) - (pill.l + pill.r));
+  const lead = dragging ? 0.34 : 0.12;
+  const trail = dragging ? 0.26 : 0.06;
+  const damp = dragging ? 0.62 : 0.76;
+  const kl = dir > 0 ? trail : lead;
+  const kr = dir < 0 ? trail : lead;
+  pill.vl = (pill.vl + (pill.tl - pill.l) * kl) * damp;
+  pill.vr = (pill.vr + (pill.tr - pill.r) * kr) * damp;
+  pill.l += pill.vl;
+  pill.r += pill.vr;
+  const settled = Math.abs(pill.tl - pill.l) < 0.15 && Math.abs(pill.tr - pill.r) < 0.15 && Math.abs(pill.vl) < 0.05 && Math.abs(pill.vr) < 0.05;
+  if (settled) { pill.l = pill.tl; pill.r = pill.tr; pill.vl = pill.vr = 0; }
+  renderPill();
+  if (!settled) pill.raf = requestAnimationFrame(pillStep);
+}
+
 function setIndicator(left, width) {
-  indicator.style.transform = `translateX(${left}px)`;
-  if (width != null) indicator.style.width = width + 'px';
+  const w = width != null ? width : (pill.tr - pill.tl);
+  pill.tl = left;
+  pill.tr = left + w;
+  if (pill.l === null || REDUCED_MOTION) { snapPill(); return; }
+  if (!pill.raf) pill.raf = requestAnimationFrame(pillStep);
+}
+
+function snapPill() {
+  if (pill.raf) { cancelAnimationFrame(pill.raf); pill.raf = 0; }
+  pill.l = pill.tl; pill.r = pill.tr; pill.vl = pill.vr = 0;
+  renderPill();
 }
 
 function moveIndicator(el, instant) {
-  if (instant) indicator.style.transition = 'none';
-  else indicator.style.transition = '';
   const g = itemGeom(el);
   setIndicator(g.left, g.width);
-  if (instant) requestAnimationFrame(() => { indicator.style.transition = ''; });
+  if (instant) snapPill();
 }
 
 function activeItem() {
@@ -889,8 +935,7 @@ function onPointerMove(e) {
     dragState.width = indRect.width;
     dragState.stops = sectionStops();
     nav.classList.add('dragging');
-    indicator.style.transition = 'none';
-    indicator.style.width = dragState.width + 'px';
+    pill.tr = pill.tl + dragState.width;
   }
 
   const { min, max } = indicatorBounds(dragState.width);
