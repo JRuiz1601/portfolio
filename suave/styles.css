@@ -1891,3 +1891,155 @@ body.lb-open { overflow: hidden; }
 @media (max-width: 720px) {
   .jr-chapter { font-size: 260px; right: -60px; top: -10px; }
 }
+
+/* =========================================================
+   Carruseles horizontales: menos scroll hacia abajo
+   ========================================================= */
+.lead strong { color: var(--text); font-weight: 600; }
+
+.rail { position: relative; }
+.rail-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 0;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding: 4px 2px 8px;
+  margin: -4px -2px 0;
+  cursor: grab;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 60px), transparent);
+}
+.rail.scrolled .rail-track {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 60px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 60px), transparent);
+}
+.rail-track::-webkit-scrollbar { display: none; }
+.rail-track.dragging { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.rail-track.dragging * { pointer-events: none; }
+.rail-track:focus-visible { outline: 2px solid var(--sky); outline-offset: 4px; border-radius: var(--r-lg); }
+.rail-track > * { flex: 0 0 auto; scroll-snap-align: start; }
+
+.rail-nav { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+.rail-hint { font-family: var(--display); font-size: 13.5px; font-weight: 500; color: var(--faint); white-space: nowrap; transition: opacity 0.4s var(--ease); }
+.rail.scrolled .rail-hint { opacity: 0; }
+.rail-bar { position: relative; flex: 1; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+.rail-thumb { position: absolute; top: 0; bottom: 0; left: 0; width: 30%; border-radius: 3px; background: linear-gradient(90deg, var(--sky), var(--cream)); transition: left 0.15s linear; }
+.rail-btn {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--cream-ink);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.45s var(--spring), opacity 0.3s var(--ease), background 0.3s var(--ease);
+}
+.rail-btn:hover:not(:disabled) { transform: scale(1.08); }
+.rail-btn:disabled { opacity: 0.25; cursor: default; background: var(--surface-2); color: var(--muted); }
+.rail-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--sky); }
+.rail.no-scroll .rail-nav { display: none; }
+
+/* stack: cada categoría es una tarjeta del carrusel */
+.rail-stack .stack-group { width: min(420px, 82vw); margin: 0; }
+.rail-stack .stack-group:first-child { width: min(560px, 86vw); grid-column: auto; }
+.rail-stack .tiles { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+
+/* más proyectos */
+.more-projects { margin-top: 70px; }
+.more-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px 30px; flex-wrap: wrap; margin-bottom: 24px; }
+.more-title { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 3.4vw, 44px); letter-spacing: -0.045em; }
+.more-intro { color: var(--muted); font-size: 16px; max-width: 42ch; }
+.mini-story {
+  width: min(460px, 84vw);
+  border-radius: var(--r-xl);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015) 60%);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.mini-stage {
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(77, 90, 163, 0.4), transparent 60%),
+    radial-gradient(circle at 85% 80%, rgba(251, 230, 204, 0.08), transparent 55%),
+    var(--bg-2);
+}
+.mini-orb { animation: float 7s ease-in-out infinite; animation-delay: calc(var(--i) * -1.4s); }
+.mini-logo {
+  width: 66px;
+  height: 66px;
+  padding: 16px;
+  border-radius: 22px;
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 14%, rgba(255, 255, 255, 0.03));
+  border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent);
+}
+.mini-body { padding: 24px 26px 28px; display: flex; flex-direction: column; flex: 1; }
+.mini-meta { display: flex; align-items: center; gap: 12px; font-size: 13.5px; color: var(--muted); }
+.mini-num { width: 36px; height: 36px; font-size: 13px; }
+.mini-name { margin-top: 16px; font-family: var(--display); font-weight: 600; font-size: 24px; line-height: 1.12; letter-spacing: -0.035em; }
+.mini-pitch { margin-top: 10px; font-size: 15.5px; line-height: 1.6; color: rgba(244, 239, 231, 0.75); }
+.mini-result { margin-top: 18px; padding: 16px 18px; border-radius: var(--r-md); background: rgba(251, 230, 204, 0.06); border: 1px solid rgba(251, 230, 204, 0.14); }
+.mini-result .step-label { margin-bottom: 8px; font-size: 14px; }
+.mini-result .step-n { background: var(--cream); color: var(--cream-ink); }
+.mini-result p { font-size: 14.5px; line-height: 1.6; color: rgba(244, 239, 231, 0.82); }
+.mini-link { align-self: flex-start; margin-top: auto; }
+.mini-body .chip-row { margin-bottom: 20px; }
+
+@media (max-width: 720px) {
+  /* pasos de cada proyecto: de lado en vez de apilados */
+  .steps {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    gap: 10px;
+    margin-left: -18px;
+    margin-right: -18px;
+    padding: 0 18px 4px;
+    scroll-padding-left: 18px;
+  }
+  .steps::-webkit-scrollbar { display: none; }
+  .steps .step { flex: 0 0 82%; scroll-snap-align: start; }
+
+  /* "por el camino": de lado */
+  .along-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    gap: 22px;
+  }
+  .along-grid::-webkit-scrollbar { display: none; }
+  .along-grid .aside-item { flex: 0 0 78%; scroll-snap-align: start; }
+
+  /* contacto más compacto: dos columnas */
+  .contact-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .contact-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; }
+  .contact-mark { width: 40px; height: 40px; border-radius: 13px; }
+  .contact-value { font-size: 14.5px; }
+
+  .rail-btn { width: 40px; height: 40px; }
+  .more-projects { margin-top: 50px; }
+  .mini-stage { height: 140px; }
+  .mini-logo { width: 56px; height: 56px; padding: 13px; }
+  .rail-stack .stack-group, .rail-stack .stack-group:first-child { width: 80vw; padding: 20px; }
+  .rail-stack .stack-group-title { font-size: 18px; }
+  .rail-stack .tiles { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .rail-stack .tile { flex-direction: row; align-items: center; justify-content: flex-start; gap: 10px; min-height: 0; padding: 10px 12px; border-radius: 14px; }
+  .rail-stack .tile-logo, .rail-stack .tile-mono { width: 22px; height: 22px; flex-shrink: 0; }
+  .rail-stack .tile-mono { border-radius: 7px; }
+  .rail-stack .tile-mono .ico { width: 14px; height: 14px; }
+  .rail-stack .tile-name { font-size: 12.5px; line-height: 1.25; }
+}

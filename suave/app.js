@@ -24,7 +24,13 @@ function applyI18n(root = document) {
   root.querySelectorAll('[data-i18n]').forEach(el => {
     const path = el.getAttribute('data-i18n');
     const val = getPath(STORY, path) ?? getPath(CONTENT, path);
-    el.textContent = tField(val);
+    const text = tField(val);
+    if (text.includes('**')) {
+      const esc = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      el.innerHTML = esc.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    } else {
+      el.textContent = text;
+    }
   });
   document.querySelectorAll('[data-hv]').forEach(a => a.setAttribute('href', asset(tField(CONTENT.hvUrl))));
   document.documentElement.lang = LANG;
@@ -181,8 +187,10 @@ function renderLogoStage(slugs) {
 function renderProyectos() {
   const c = CONTENT.proyectos;
   const s = STORY.pasos;
-  const stories = c.lista.map((p, idx) => {
-    const hasMedia = p.media && p.media.length;
+  const featured = c.lista.map((p, idx) => [p, idx]).filter(([p]) => p.media && p.media.length);
+  const more = c.lista.map((p, idx) => [p, idx]).filter(([p]) => !(p.media && p.media.length));
+  const stories = featured.map(([p, idx]) => {
+    const hasMedia = true;
     const org = STORY.proyectosOrg[idx];
     const steps = [
       ['problema', p.problema],
@@ -221,7 +229,92 @@ function renderProyectos() {
       </div>
     </article>`;
   }).join('');
-  return `${chapterHead('proyectos')}<div class="stories">${stories}</div>`;
+  const cards = more.map(([p, idx]) => `
+    <article class="mini-story">
+      <div class="mini-stage">${(STORY.proyectosVisual[idx] || []).map((sl, i) => `<span class="mini-orb" style="--i:${i}">${logoSvg(sl, 'mini-logo')}</span>`).join('')}</div>
+      <div class="mini-body">
+        <div class="mini-meta"><span class="story-num mini-num">${String(idx + 1).padStart(2, '0')}</span><span>${tField(p.contexto)} · ${tField(p.periodo)}</span></div>
+        <h4 class="mini-name">${tField(p.nombre)}</h4>
+        <p class="mini-pitch">${tField(p.pitch)}</p>
+        <div class="mini-result"><span class="step-label"><span class="step-n">✓</span>${tField(s.resultado)}</span><p>${tField(p.resultado)}</p></div>
+        ${renderChips(p.stack)}
+        ${p.repo ? `<a class="pill-link mini-link" href="https://${p.repo}" target="_blank" rel="noopener">${logoSvg('github', 'pill-logo')}${tField(c.verRepo)} ↗</a>` : ''}
+      </div>
+    </article>`);
+  const mas = STORY.masProyectos;
+  return `${chapterHead('proyectos')}<div class="stories">${stories}</div>
+    ${cards.length ? `<div class="more-projects reveal">
+      <div class="more-head">
+        <h3 class="more-title">${tField(mas.titulo)}</h3>
+        <p class="more-intro">${tField(mas.intro)}</p>
+      </div>
+      ${rail(cards, 'rail-projects')}
+    </div>` : ''}`;
+}
+
+// Carrusel horizontal (deslizar con el dedo, arrastrar con el mouse o usar las flechas)
+function rail(items, cls = '') {
+  return `
+    <div class="rail ${cls}" data-rail>
+      <div class="rail-track" tabindex="0">${items.join('')}</div>
+      <div class="rail-nav">
+        <span class="rail-hint">${tField(STORY.deslizar)} →</span>
+        <span class="rail-bar"><span class="rail-thumb"></span></span>
+        <button class="rail-btn prev" type="button" aria-label="${tField(STORY.anterior)}">‹</button>
+        <button class="rail-btn next" type="button" aria-label="${tField(STORY.siguiente)}">›</button>
+      </div>
+    </div>`;
+}
+
+function setupRails() {
+  document.querySelectorAll('[data-rail]').forEach(r => {
+    const track = r.querySelector('.rail-track');
+    const thumb = r.querySelector('.rail-thumb');
+    const prev = r.querySelector('.rail-btn.prev');
+    const next = r.querySelector('.rail-btn.next');
+    const step = () => {
+      const first = track.children[0];
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 16;
+      return first ? first.getBoundingClientRect().width + gap : track.clientWidth * 0.8;
+    };
+    const sync = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const ratio = track.clientWidth / Math.max(1, track.scrollWidth);
+      const pos = max > 0 ? track.scrollLeft / max : 0;
+      thumb.style.width = (ratio * 100) + '%';
+      thumb.style.left = (pos * (1 - ratio) * 100) + '%';
+      prev.disabled = track.scrollLeft < 4;
+      next.disabled = track.scrollLeft > max - 4;
+      r.classList.toggle('no-scroll', max <= 4);
+      r.classList.toggle('scrolled', track.scrollLeft > 4);
+    };
+    prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: REDUCED_MOTION ? 'auto' : 'smooth' }));
+    next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: REDUCED_MOTION ? 'auto' : 'smooth' }));
+    track.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+    window.addEventListener('resize', sync);
+
+    // arrastre con mouse en escritorio
+    let drag = null;
+    track.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, left: track.scrollLeft, moved: false };
+    });
+    window.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x;
+      if (!drag.moved && Math.abs(dx) < 6) return;
+      if (!drag.moved) { drag.moved = true; track.classList.add('dragging'); }
+      track.scrollLeft = drag.left - dx;
+    });
+    window.addEventListener('pointerup', () => {
+      if (!drag) return;
+      const moved = drag.moved;
+      drag = null;
+      track.classList.remove('dragging');
+      if (moved) track.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); }, { capture: true, once: true });
+    });
+    sync();
+  });
 }
 
 // Tecnologías sin logo de marca: un ícono de concepto según la palabra
@@ -239,7 +332,7 @@ function conceptIcon(name) {
 function renderStack() {
   const c = CONTENT.stack;
   const groups = c.categorias.map(cat => `
-    <div class="stack-group reveal">
+    <div class="stack-group">
       <div class="stack-group-title">${tField(cat.nombre)}</div>
       <div class="tiles">
         ${cat.items.map((item, idx) => {
@@ -252,8 +345,8 @@ function renderStack() {
         }).join('')}
       </div>
     </div>
-  `).join('');
-  return `${chapterHead('stack')}<div class="stack-groups">${groups}</div>`;
+  `).join('<!--g-->');
+  return `${chapterHead('stack')}<div class="reveal">${rail(c.categorias.map((_, i) => groups.split('<!--g-->')[i]), 'rail-stack')}</div>`;
 }
 
 function renderContacto() {
@@ -317,6 +410,7 @@ function renderSections(markRevealed) {
   });
   setupReveal(markRevealed);
   setupGalleries();
+  setupRails();
   refreshScrollFx();
 }
 
@@ -402,7 +496,8 @@ function updateScrollFx() {
   if (REDUCED_MOTION) { fxEls.forEach(el => el.style.setProperty('--p', 1)); return; }
 
   const hh = heroEl.offsetHeight || vh;
-  heroEl.style.setProperty('--hp', Math.max(0, Math.min(1, y / (hh * 0.85))).toFixed(4));
+  // empieza cuando ya pasaste ~45% del inicio, para que se lea tranquilo
+  heroEl.style.setProperty('--hp', Math.max(0, Math.min(1, (y - hh * 0.45) / (hh * 0.5))).toFixed(4));
 
   for (const el of fxEls) {
     const r = el.getBoundingClientRect();
