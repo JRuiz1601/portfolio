@@ -355,27 +355,51 @@ a { color: inherit; }
   display: block;
   width: 100%;
   aspect-ratio: 1;
-  padding: 14px;
+  padding: 0;
   border: none;
-  border-radius: 50%;
-  background: var(--cream);
+  background: none;
   cursor: pointer;
   font: inherit;
   color: inherit;
   animation: float 9s ease-in-out infinite;
-  transition: transform 0.6s var(--spring);
 }
-.portrait-disc img {
-  display: block;
-  width: 100%;
-  height: 100%;
+/* el fondo de la foto ahora es la misma noche difusa de la página */
+.portrait-bg {
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
+  background:
+    radial-gradient(circle at 70% 28%, rgba(147, 179, 219, 0.55), transparent 48%),
+    radial-gradient(circle at 25% 80%, rgba(251, 230, 204, 0.16), transparent 50%),
+    linear-gradient(160deg, #3E4A8C 0%, #2A2F52 48%, #1D1F26 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 30px 80px rgba(0, 0, 0, 0.35);
+}
+.portrait-bg::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid rgba(251, 230, 204, 0.18);
+}
+/* la persona sale un poco por encima del disco y se recorta en la curva de abajo */
+.portrait-disc img {
+  position: absolute;
+  left: -4%;
+  bottom: 0;
+  width: 108%;
+  height: 128%;
   object-fit: cover;
-  object-position: 50% 22%;
+  object-position: 50% 0%;
+  clip-path: inset(0 0 0 0 round 0 0 46.3% 46.3% / 0 0 39% 39%);
+  filter: drop-shadow(0 18px 30px rgba(10, 12, 20, 0.45));
+  transform-origin: 50% 100%;
   transition: transform 0.9s var(--ease);
 }
-.portrait-disc:hover img { transform: scale(1.03); }
-.portrait-disc:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--sky); }
+.portrait-disc:hover img { transform: scale(1.025); }
+.portrait-disc:focus-visible { outline: none; }
+.portrait-disc:focus-visible .portrait-bg { box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--sky); }
 
 .portrait-play {
   position: absolute;
@@ -1487,7 +1511,6 @@ body.lb-open { overflow: hidden; }
     gap: 40px;
   }
   .portrait { order: -1; width: min(72vw, 280px); }
-  .portrait-disc { padding: 10px; }
   .portrait-tag { right: -6%; font-size: 12px; }
   .hello { font-size: clamp(44px, 13.5vw, 64px); max-width: none; }
   .lead { margin-top: 22px; }

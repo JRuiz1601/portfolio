@@ -828,6 +828,7 @@ langButtons.forEach(btn => btn.addEventListener('click', () => setLang(btn.datas
 
 // ---------- init ----------
 langButtons.forEach(b => b.classList.toggle('active', b.dataset.lang === LANG));
+STORY.ajustarContenido(CONTENT);
 applyI18n();
 renderSignals();
 renderMarquee();
