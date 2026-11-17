@@ -2002,32 +2002,6 @@ body.lb-open { overflow: hidden; }
 .mini-body .chip-row { margin-bottom: 20px; }
 
 @media (max-width: 720px) {
-  /* pasos de cada proyecto: de lado en vez de apilados */
-  .steps {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    gap: 10px;
-    margin-left: -18px;
-    margin-right: -18px;
-    padding: 0 18px 4px;
-    scroll-padding-left: 18px;
-  }
-  .steps::-webkit-scrollbar { display: none; }
-  .steps .step { flex: 0 0 82%; scroll-snap-align: start; }
-
-  /* "por el camino": de lado */
-  .along-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    gap: 22px;
-  }
-  .along-grid::-webkit-scrollbar { display: none; }
-  .along-grid .aside-item { flex: 0 0 78%; scroll-snap-align: start; }
-
   /* contacto más compacto: dos columnas */
   .contact-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .contact-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; }
@@ -2046,4 +2020,37 @@ body.lb-open { overflow: hidden; }
   .rail-stack .tile-mono { border-radius: 7px; }
   .rail-stack .tile-mono .ico { width: 14px; height: 14px; }
   .rail-stack .tile-name { font-size: 12.5px; line-height: 1.25; }
+}
+
+/* ---------- carruseles que en pantalla grande son cuadrícula ---------- */
+.rail-steps { margin-top: 40px; }
+.rail-along .aside-item { width: auto; }
+@media (min-width: 721px) {
+  .rail-grid .rail-track {
+    display: grid;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+    cursor: default;
+    padding: 0;
+    margin: 0;
+  }
+  .rail-grid .rail-nav { display: none; }
+  .rail-along .rail-track { grid-template-columns: repeat(3, 1fr); gap: 30px; }
+  .rail-steps .rail-track { gap: 16px; }
+  .rail-steps.steps-3 .rail-track { grid-template-columns: repeat(3, 1fr); }
+  .rail-steps.steps-4 .rail-track { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 721px) and (max-width: 1000px) {
+  .rail-steps.steps-3 .rail-track { grid-template-columns: 1fr; }
+  .rail-along .rail-track { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px) {
+  .rail-steps { margin-top: 26px; }
+  .rail-steps .step { width: 64vw; }
+  .rail-along .aside-item { width: 64vw; }
+  .rail-along .rail-track { gap: 16px; }
+  /* en celular las tarjetas del carrusel ya están visibles, así asoma la siguiente */
+  .rail-track > .reveal { opacity: 1; transform: none; filter: none; }
+  .rail-grid .rail-nav { margin-top: 14px; }
 }

@@ -127,22 +127,21 @@ function renderExperiencia() {
       <div class="aside-detail">${tField(l.detalle)}</div>
       <div class="aside-when">${l.año}</div>
     </div>
-  `).join('');
+  `);
+  const eduItem = `
+        <div class="aside-item reveal" style="--i:0">
+          ${orgBadge('icesi', 'aside-icon aside-org')}
+          <div class="aside-title">${tField(edu.programa)}</div>
+          <div class="aside-detail">${edu.institucion}</div>
+          <div class="aside-when">${tField(edu.periodo)}</div>
+        </div>`;
 
   return `
     ${chapterHead('experiencia')}
     <div class="timeline" data-fx="through"><span class="timeline-fill" aria-hidden="true"></span>${jobs}</div>
     <div class="along reveal">
       <div class="along-title">${tField(STORY.tambien)}</div>
-      <div class="along-grid">
-        <div class="aside-item reveal" style="--i:0">
-          ${orgBadge('icesi', 'aside-icon aside-org')}
-          <div class="aside-title">${tField(edu.programa)}</div>
-          <div class="aside-detail">${edu.institucion}</div>
-          <div class="aside-when">${tField(edu.periodo)}</div>
-        </div>
-        ${logros}
-      </div>
+      ${rail([eduItem, ...logros], 'rail-grid rail-along')}
     </div>
   `;
 }
@@ -213,13 +212,11 @@ function renderProyectos() {
       <h3 class="story-name">${tField(p.nombre)}</h3>
       <p class="story-pitch">${tField(p.pitch)}</p>
       ${hasMedia ? renderGallery(p, idx) : renderLogoStage(STORY.proyectosVisual[idx])}
-      <ol class="steps steps-${steps.length}">
-        ${steps.map(([k, v], i) => `
-          <li class="step step-${k} reveal" style="--i:${i}">
+      ${rail(steps.map(([k, v], i) => `
+          <div class="step step-${k} reveal" style="--i:${i}">
             <span class="step-label"><span class="step-n">${i + 1}</span>${tField(s[k])}</span>
             <p>${tField(v)}</p>
-          </li>`).join('')}
-      </ol>
+          </div>`), `rail-grid rail-steps steps-${steps.length}`)}
       <div class="story-foot">
         <div class="story-stack"><span class="story-stack-label">${tField(STORY.conQue)}</span>${renderChips(p.stack)}</div>
         ${(p.repo || p.demo) ? `<div class="story-links">
