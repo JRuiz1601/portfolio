@@ -81,7 +81,7 @@ function chapterHead(key) {
   return `
     <header class="chapter-head reveal">
       <span class="chapter-kicker">${tField(c.kicker)}</span>
-      <h2 class="chapter-title">${tField(c.titulo)}</h2>
+      <h2 class="chapter-title">${tField(c.titulo).split(' ').map((w, i) => `<span class="cw" style="--i:${i}">${w}</span>`).join(' ')}</h2>
       <p class="chapter-intro">${tField(c.intro)}</p>
     </header>`;
 }
@@ -107,7 +107,7 @@ function renderExperiencia() {
   const edu = c.educacion;
   const logroIcon = ['trophy', 'badge'];
   const logros = c.logros.map((l, i) => `
-    <div class="aside-item">
+    <div class="aside-item reveal" style="--i:${i + 1}">
       <span class="aside-icon">${icon(logroIcon[i] || 'badge')}</span>
       <div class="aside-title">${tField(l.titulo)}</div>
       <div class="aside-detail">${tField(l.detalle)}</div>
@@ -117,11 +117,11 @@ function renderExperiencia() {
 
   return `
     ${chapterHead('experiencia')}
-    <div class="timeline">${jobs}</div>
+    <div class="timeline" data-fx="through"><span class="timeline-fill" aria-hidden="true"></span>${jobs}</div>
     <div class="along reveal">
       <div class="along-title">${tField(STORY.tambien)}</div>
       <div class="along-grid">
-        <div class="aside-item">
+        <div class="aside-item reveal" style="--i:0">
           ${orgBadge('icesi', 'aside-icon aside-org')}
           <div class="aside-title">${tField(edu.programa)}</div>
           <div class="aside-detail">${edu.institucion}</div>
@@ -183,7 +183,7 @@ function renderProyectos() {
       ['resultado', p.resultado]
     ];
     return `
-    <article class="story reveal ${hasMedia ? 'has-media' : 'no-media'}">
+    <article class="story reveal ${hasMedia ? 'has-media' : 'no-media'}" data-fx="enter">
       <div class="story-head">
         <span class="story-num">${String(idx + 1).padStart(2, '0')}</span>
         ${orgBadge(org, 'story-org')}
@@ -199,7 +199,7 @@ function renderProyectos() {
       ${hasMedia ? renderGallery(p, idx) : renderLogoStage(STORY.proyectosVisual[idx])}
       <ol class="steps steps-${steps.length}">
         ${steps.map(([k, v], i) => `
-          <li class="step step-${k}">
+          <li class="step step-${k} reveal" style="--i:${i}">
             <span class="step-label"><span class="step-n">${i + 1}</span>${tField(s[k])}</span>
             <p>${tField(v)}</p>
           </li>`).join('')}
@@ -234,10 +234,10 @@ function renderStack() {
     <div class="stack-group reveal">
       <div class="stack-group-title">${tField(cat.nombre)}</div>
       <div class="tiles">
-        ${cat.items.map(item => {
+        ${cat.items.map((item, idx) => {
           const slug = slugFor(item);
           const name = tField(item);
-          return `<div class="tile${slug ? '' : ' tile-text'}">
+          return `<div class="tile${slug ? '' : ' tile-text'} reveal" style="--i:${idx}">
             ${slug ? logoSvg(slug, 'tile-logo') : `<span class="tile-mono">${icon(conceptIcon(name))}</span>`}
             <span class="tile-name">${name}</span>
           </div>`;
@@ -253,16 +253,18 @@ function renderContacto() {
   const l = c.labels;
   const h = STORY.hvCard;
   const otherLang = LANG === 'es' ? 'en' : 'es';
+  let rowI = 0;
   const row = (mark, label, value, href, ext) => {
     const inner = `<span class="contact-mark">${mark}</span><span class="contact-text"><span class="contact-label">${label}</span><span class="contact-value">${value}</span></span>`;
+    rowI++;
     return href
-      ? `<a class="contact-row" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ''}>${inner}<span class="contact-arrow" aria-hidden="true">↗</span></a>`
-      : `<div class="contact-row">${inner}</div>`;
+      ? `<a class="contact-row reveal" style="--i:${rowI}" href="${href}"${ext ? ' target="_blank" rel="noopener"' : ''}>${inner}<span class="contact-arrow" aria-hidden="true">↗</span></a>`
+      : `<div class="contact-row reveal" style="--i:${rowI}">${inner}</div>`;
   };
   return `
     ${chapterHead('contacto')}
 
-    <a class="hv-hero reveal" href="${asset(tField(CONTENT.hvUrl))}" download data-hv>
+    <a class="hv-hero reveal" data-fx="enter" href="${asset(tField(CONTENT.hvUrl))}" download data-hv>
       <span class="hv-hero-text">
         <span class="hv-hero-kicker">${tField(h.kicker)}</span>
         <span class="hv-hero-title">${tField(h.titulo)}</span>
@@ -285,7 +287,7 @@ function renderContacto() {
           ${row(logoSvg('whatsapp', 'mark-logo'), 'WhatsApp · ' + tField(l.telefono), c.telefono, `https://wa.me/${c.telefono.replace(/\D/g, '')}`, true)}
           ${row(logoSvg('linkedin', 'mark-logo'), tField(l.linkedin), c.linkedin.replace('linkedin.com', ''), `https://${c.linkedin}`, true)}
           ${row(logoSvg('github', 'mark-logo'), tField(l.github), c.github.replace('github.com/', '@'), `https://${c.github}`, true)}
-          ${row(logoSvg('youtube', 'mark-logo'), 'Pitch', tField(c.pitchLabel), c.pitchUrl, true).replace('<a class="contact-row"', '<a class="contact-row" data-open-pitch')}
+          ${row(logoSvg('youtube', 'mark-logo'), 'Pitch', tField(c.pitchLabel), c.pitchUrl, true).replace('<a class="contact-row', '<a data-open-pitch class="contact-row')}
           ${row(icon('pin', 'mark-ico'), tField(l.ciudad), c.ciudad)}
           ${row(icon('globe', 'mark-ico'), tField(l.idiomas), tField(c.idiomas))}
         </div>
@@ -307,17 +309,28 @@ function renderSections(markRevealed) {
   });
   setupReveal(markRevealed);
   setupGalleries();
+  refreshScrollFx();
 }
 
+// Un solo logro destacado (Global Hack), en vez de la fila de cifras
 function renderSignals() {
   const el = document.getElementById('signals');
-  el.innerHTML = CONTENT.hero.senales.map((s, i) => `
-    <div class="number reveal">
-      <span class="number-icon">${icon(STORY.numerosIcono[i] || 'badge')}</span>
-      <div class="number-big">${s.num}</div>
-      <div class="number-label">${tField(s.label)}</div>
-    </div>
-  `).join('');
+  const l = CONTENT.experiencia.logros[0];
+  const m = STORY.manifiesto;
+  el.innerHTML = `
+    <article class="highlight reveal" data-fx="enter">
+      <span class="highlight-glow" aria-hidden="true"></span>
+      <div class="highlight-side">
+        <span class="highlight-trophy">${icon('trophy')}</span>
+        <div class="highlight-num">3<sup>${LANG === 'en' ? 'rd' : '.er'}</sup></div>
+        <div class="highlight-place">${tField(m.destacadoPuesto)}</div>
+      </div>
+      <div class="highlight-body">
+        <span class="highlight-kicker">${tField(m.destacadoKicker)}</span>
+        <h3 class="highlight-title">Global Hack 2025</h3>
+        <p class="highlight-detail">${tField(l.detalle)}</p>
+      </div>
+    </article>`;
 }
 
 function renderMarquee() {
@@ -357,6 +370,46 @@ window.addEventListener('scroll', () => {
   if (!manifestoQueued) { manifestoQueued = true; requestAnimationFrame(updateManifesto); }
 }, { passive: true });
 window.addEventListener('resize', updateManifesto);
+
+// ---------- animaciones ligadas al scroll ----------
+// Cada elemento con data-fx recibe --p (0 → 1) según su posición en pantalla, y el CSS
+// traduce ese número en movimiento suave. Sin librerías: un solo rAF por frame.
+const fxRoot = document.documentElement;
+const heroEl = document.getElementById('inicio');
+let fxEls = [];
+let fxQueued = false;
+
+function refreshScrollFx() {
+  fxEls = Array.from(document.querySelectorAll('[data-fx]'));
+  updateScrollFx();
+}
+
+function updateScrollFx() {
+  fxQueued = false;
+  const vh = window.innerHeight;
+  const y = window.scrollY;
+  const max = Math.max(1, document.documentElement.scrollHeight - vh);
+  fxRoot.style.setProperty('--sy', y.toFixed(1));
+  fxRoot.style.setProperty('--read', (y / max).toFixed(4));
+  if (REDUCED_MOTION) { fxEls.forEach(el => el.style.setProperty('--p', 1)); return; }
+
+  const hh = heroEl.offsetHeight || vh;
+  heroEl.style.setProperty('--hp', Math.max(0, Math.min(1, y / (hh * 0.85))).toFixed(4));
+
+  for (const el of fxEls) {
+    const r = el.getBoundingClientRect();
+    if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) continue;
+    let p;
+    if (el.dataset.fx === 'through') p = (vh * 0.62 - r.top) / Math.max(1, r.height);
+    else p = (vh - r.top) / (vh * 0.75);
+    el.style.setProperty('--p', Math.max(0, Math.min(1, p)).toFixed(4));
+  }
+}
+
+window.addEventListener('scroll', () => {
+  if (!fxQueued) { fxQueued = true; requestAnimationFrame(updateScrollFx); }
+}, { passive: true });
+window.addEventListener('resize', updateScrollFx);
 
 // ---------- scroll reveal ----------
 let revealObserver = null;

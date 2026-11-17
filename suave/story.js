@@ -21,6 +21,8 @@ const STORY = {
     ctaHistoria: { es: "Empieza la historia", en: "Start the story" },
     ctaContacto: { es: "Escríbeme", en: "Write to me" },
     hv: { es: "HV", en: "CV" },
+    hvTitulo: { es: "Descargar mi HV", en: "Download my CV" },
+    hvSub: { es: "PDF · 1 página · español", en: "PDF · 1 page · English" },
     verPitch: { es: "Mi pitch", en: "My pitch" },
     scroll: { es: "Desliza", en: "Scroll" }
   },
@@ -32,7 +34,8 @@ const STORY = {
     },
     // palabras que se resaltan en crema cuando se encienden
     enfasis: ["funcione", "martes", "fila", "works", "tuesday", "lined"],
-    numerosTitulo: { es: "Hasta ahora, en números", en: "So far, in numbers" }
+    destacadoKicker: { es: "Un momento que me marcó", en: "A moment that shaped me" },
+    destacadoPuesto: { es: "puesto nacional", en: "place nationally" }
   },
 
   capitulos: {

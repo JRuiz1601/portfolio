@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
@@ -21,6 +21,7 @@
   <span class="cloud c4"></span>
 </div>
 <div class="grain" aria-hidden="true"></div>
+<div class="scroll-progress" aria-hidden="true"><span></span></div>
 
 <a class="brand" href="#inicio" data-scroll-to="inicio" aria-label="Inicio">Juan<span>.</span></a>
 
@@ -63,14 +64,17 @@
     <p class="lead" data-i18n="hero.lead"></p>
 
     <div class="cta-row">
-      <a class="btn btn-cream" href="#experiencia" data-scroll-to="experiencia">
+      <a class="btn btn-hv" href="../assets/hv-juan-esteban-ruiz-ome.pdf" download data-hv>
+        <span class="btn-hv-sheet" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="btn-hv-text">
+          <span class="btn-hv-title" data-i18n="hero.hvTitulo">Descargar mi HV</span>
+          <span class="btn-hv-sub" data-i18n="hero.hvSub">PDF · 1 página · español</span>
+        </span>
+        <span class="btn-hv-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg></span>
+      </a>
+      <a class="btn btn-soft" href="#experiencia" data-scroll-to="experiencia">
         <span data-i18n="hero.ctaHistoria">Empieza la historia</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></svg>
-      </a>
-      <a class="btn btn-soft" href="#contacto" data-scroll-to="contacto" data-i18n="hero.ctaContacto">Escríbeme</a>
-      <a class="hv-link" href="../assets/hv-juan-esteban-ruiz-ome.pdf" download data-hv>
-        <span data-i18n="hero.hv">HV</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
       </a>
     </div>
   </div>
@@ -84,7 +88,6 @@
         <span data-i18n="hero.verPitch">Mi pitch</span>
       </span>
     </button>
-    <span class="portrait-tag">Cali, CO</span>
   </div>
 
   <a class="scroll-hint" href="#manifiesto" aria-hidden="true" tabindex="-1">
@@ -100,10 +103,7 @@
 
 <section class="manifesto" id="manifiesto">
   <p class="manifesto-text" id="manifestoText"></p>
-  <div class="numbers">
-    <div class="numbers-title" data-i18n="manifiesto.numerosTitulo">Hasta ahora, en números</div>
-    <div class="numbers-row" id="signals"></div>
-  </div>
+  <div class="highlight-wrap" id="signals"></div>
 </section>
 
 <section class="section" id="experiencia" data-section></section>
@@ -113,11 +113,10 @@
 </main>
 
 <footer class="footer">
-  <div class="footer-card">
+  <div class="footer-card" data-fx="enter">
     <span class="footer-jr" aria-hidden="true"><span class="j">J</span><span class="r">R</span></span>
     <div class="footer-row">
       <span class="footer-brand">Juan<span>.</span></span>
-      <span data-i18n="cierre">Hecho en Cali, con calma.</span>
       <a href="../" data-i18n="versionClasica">Ver versión clásica</a>
     </div>
   </div>
@@ -139,8 +138,8 @@
 </div>
 
 <script src="../content.js?v=4"></script>
-<script src="story.js?v=3"></script>
+<script src="story.js?v=4"></script>
 <script src="logos.js?v=1"></script>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
