@@ -1368,21 +1368,51 @@ a.contact-row:hover { transform: translateY(-3px); border-color: rgba(255, 255, 
 a.contact-row:hover .contact-arrow { color: var(--sky); transform: translate(2px, -2px); }
 a.contact-row:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--sky); }
 
-/* ---------- footer ---------- */
+/* ---------- footer: "Juan." + JR grande de marca de agua ---------- */
 .footer {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 36px 48px 120px;
+  padding: 0 48px 120px;
+}
+.footer-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 40px 38px;
+  border-radius: var(--r-xl);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+}
+.footer-jr {
+  position: absolute;
+  right: 36px;
+  bottom: -26px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 280px;
+  line-height: 0.8;
+  letter-spacing: -0.13em;
+  padding-right: 0.13em;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.footer-jr .j { color: rgba(147, 179, 219, 0.13); }
+.footer-jr .r { color: rgba(251, 230, 204, 0.11); }
+.footer-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 10px 24px;
-  border-top: 1px solid var(--line);
-  font-size: 14.5px;
+  font-size: 15px;
   color: var(--muted);
 }
-.footer-brand { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: -0.05em; color: var(--sky); }
-.footer a { margin-left: auto; color: var(--muted); text-decoration-color: var(--faint); text-underline-offset: 4px; }
+.footer-brand { font-family: var(--display); font-weight: 600; font-size: 30px; letter-spacing: -0.05em; color: var(--sky); }
+.footer a { color: var(--muted); text-decoration-color: var(--faint); text-underline-offset: 4px; }
 .footer a:hover { color: var(--cream); }
 
 /* ---------- modales ---------- */
@@ -1572,8 +1602,11 @@ body.lb-open { overflow: hidden; }
   .mq-item { padding: 9px 18px 9px 10px; font-size: 14px; }
   .mq-logo { width: 30px; height: 30px; padding: 6px; }
 
-  .footer { padding: 30px 16px 130px; }
-  .footer a { margin-left: 0; }
+  .footer { padding: 0 16px 130px; }
+  .footer-card { min-height: 240px; padding: 0 24px 28px; border-radius: var(--r-lg); }
+  .footer-jr { font-size: 190px; right: 18px; bottom: -18px; }
+  .footer-row { flex-direction: column; gap: 6px; }
+  .footer-brand { font-size: 26px; }
 
   .video-modal { padding: 64px 8px 24px; }
   .lightbox { padding: 64px 8px 24px; }
