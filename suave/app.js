@@ -833,15 +833,80 @@ function releaseLock() {
   queueSpy();
 }
 
+// --- viaje suave entre secciones (en vez del scroll nativo, que es brusco y rápido) ---
+let glide = null; // { raf, done }
+const easeInOutCubic = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+const veil = document.getElementById('pageVeil');
+
+function cancelGlide() {
+  if (!glide) return;
+  cancelAnimationFrame(glide.raf);
+  clearTimeout(glide.timer);
+  if (veil) veil.classList.remove('on');
+  glide = null;
+}
+
+// Saltos largos: la página se funde a oscuro, salta cerca del destino y aparece
+// mientras recorre el último tramo despacio. Así no se ve un barrido borroso de miles de px.
+function travelTo(targetFn, done) {
+  const vh = window.innerHeight;
+  const d = targetFn() - window.scrollY;
+  if (REDUCED_MOTION || !veil || Math.abs(d) <= vh * 2.2) { glideTo(targetFn, done); return; }
+  cancelGlide();
+  const g = { raf: 0, timer: 0 };
+  glide = g;
+  veil.classList.add('on');
+  void veil.offsetWidth; // arranca el fundido ya, sin esperar al siguiente frame
+  g.timer = setTimeout(() => {
+    if (glide !== g) return;
+    const max = document.documentElement.scrollHeight - vh;
+    const pre = Math.max(0, Math.min(max, targetFn() - Math.sign(d) * vh * 0.6));
+    window.scrollTo({ top: pre, behavior: 'instant' });
+    glide = null;
+    glideTo(targetFn, done);
+    veil.classList.remove('on');
+  }, 440);
+}
+
+// targetFn devuelve el destino actual: se recalcula en cada frame por si algo cambia de alto en el camino.
+function glideTo(targetFn, done) {
+  cancelGlide();
+  const startY = window.scrollY;
+  const startTarget = targetFn();
+  const distance = Math.abs(startTarget - startY);
+  if (REDUCED_MOTION || distance < 2) {
+    window.scrollTo({ top: startTarget, behavior: 'instant' });
+    if (done) done();
+    return;
+  }
+  const duration = Math.max(700, Math.min(1800, 700 + distance * 0.35));
+  const t0 = performance.now();
+  const g = { raf: 0 };
+  glide = g;
+  const step = now => {
+    if (glide !== g) return;
+    const t = Math.min(1, (now - t0) / duration);
+    const target = targetFn();
+    window.scrollTo({ top: startY + (target - startY) * easeInOutCubic(t), behavior: 'instant' });
+    if (t < 1) { g.raf = requestAnimationFrame(step); return; }
+    glide = null;
+    if (done) done();
+  };
+  g.raf = requestAnimationFrame(step);
+}
+
 // User takes the wheel back mid-animation: hand control to the scroll-spy right away.
 ['wheel', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, e => {
-  if (!navLock) return;
+  if (!navLock && !glide) return;
   if (ev === 'touchstart' && nav.contains(e.target)) return;
   if (ev === 'keydown' && !['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) return;
+  cancelGlide();
   releaseLock();
 }, { passive: true }));
 
-if ('onscrollend' in window) window.addEventListener('scrollend', () => { if (navLock && !dragState) releaseLock(); });
+// Los scrollTo por frame del viaje disparan `scrollend`; mientras viaja no se suelta el bloqueo.
+if ('onscrollend' in window) window.addEventListener('scrollend', () => { if (navLock && !dragState && !glide) releaseLock(); });
 
 function goToSection(index, { fromDrag = false } = {}) {
   const item = items[index];
@@ -854,9 +919,8 @@ function goToSection(index, { fromDrag = false } = {}) {
   navLock = { index };
   if (distance < 2) { navLock.timer = setTimeout(releaseLock, 520); return; }
 
-  window.scrollTo({ top: y, behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
-  // Fallback for browsers without `scrollend`.
-  navLock.timer = setTimeout(releaseLock, Math.min(1600, 450 + distance * 0.25));
+  const lock = navLock;
+  travelTo(() => sectionStops()[index], () => { if (navLock === lock) releaseLock(); });
   if (history.replaceState) history.replaceState(null, '', index === 0 ? location.pathname : '#' + sections[index].id);
 }
 
@@ -864,6 +928,7 @@ function goToSection(index, { fromDrag = false } = {}) {
 let scrub = null; // { target, raf }
 
 function scrubTo(y) {
+  cancelGlide();
   if (!scrub) scrub = { target: y, raf: 0 };
   scrub.target = y;
   if (scrub.raf) return;

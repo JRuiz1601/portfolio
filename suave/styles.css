@@ -2054,3 +2054,17 @@ body.lb-open { overflow: hidden; }
   .rail-track > .reveal { opacity: 1; transform: none; filter: none; }
   .rail-grid .rail-nav { margin-top: 14px; }
 }
+
+/* ---------- telón suave para los saltos largos de la navbar ---------- */
+.page-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 85;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 30% 70%, rgba(77, 90, 163, 0.25), transparent 60%),
+    var(--bg);
+  transition: opacity 0.6s var(--ease);
+}
+.page-veil.on { opacity: 1; transition-duration: 0.36s; }
