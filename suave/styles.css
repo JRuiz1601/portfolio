@@ -1388,19 +1388,22 @@ a.contact-row:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--sky); }
 .footer-jr {
   position: absolute;
   right: 36px;
-  bottom: -26px;
+  bottom: -50px;
   font-family: var(--display);
   font-weight: 700;
-  font-size: 280px;
+  font-size: 310px;
   line-height: 0.8;
   letter-spacing: -0.13em;
   padding-right: 0.13em;
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
+  /* estilo "se desvanece": presencia arriba y se pierde hacia abajo */
+  -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 25%, transparent 92%);
 }
-.footer-jr .j { color: rgba(147, 179, 219, 0.13); }
-.footer-jr .r { color: rgba(251, 230, 204, 0.11); }
+.footer-jr .j { color: rgba(147, 179, 219, 0.22); }
+.footer-jr .r { color: rgba(251, 230, 204, 0.18); }
 .footer-row {
   position: relative;
   z-index: 1;
@@ -1604,7 +1607,7 @@ body.lb-open { overflow: hidden; }
 
   .footer { padding: 0 16px 130px; }
   .footer-card { min-height: 240px; padding: 0 24px 28px; border-radius: var(--r-lg); }
-  .footer-jr { font-size: 190px; right: 18px; bottom: -18px; }
+  .footer-jr { font-size: 210px; right: 18px; bottom: -34px; }
   .footer-row { flex-direction: column; gap: 6px; }
   .footer-brand { font-size: 26px; }
 
