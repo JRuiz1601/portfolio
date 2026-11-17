@@ -18,11 +18,6 @@ const STORY = {
       es: "Construyo software que sale de la demo y llega a la gente: facturas reales ante la DIAN, un agente que les responde a estudiantes y una plataforma que un equipo comercial usa cada día.",
       en: "I build software that leaves the demo and reaches people: real invoices filed with Colombia's tax authority, an agent that answers students, and a platform a sales team uses every day."
     },
-    estado: { es: "Buscando práctica 2027-1", en: "Open to a 2027-1 internship" },
-    estadoDetalle: {
-      es: "9.º semestre · 6 meses, tiempo completo",
-      en: "9th semester · 6 months, full-time"
-    },
     ctaHistoria: { es: "Empieza la historia", en: "Start the story" },
     ctaContacto: { es: "Escríbeme", en: "Write to me" },
     hv: { es: "HV", en: "CV" },
@@ -69,8 +64,8 @@ const STORY = {
       kicker: { es: "Capítulo 04", en: "Chapter 04" },
       titulo: { es: "¿Y si lo siguiente lo construimos juntos?", en: "What if we build the next one together?" },
       intro: {
-        es: "Busco práctica para 2027-1. Si tu equipo pone código en manos de usuarios reales, me encantaría conversar.",
-        en: "I'm looking for a 2027-1 internship. If your team puts code in the hands of real users, I'd love to talk."
+        es: "Si tu equipo pone código en manos de usuarios reales, me encantaría conversar.",
+        en: "If your team puts code in the hands of real users, I'd love to talk."
       }
     }
   },
