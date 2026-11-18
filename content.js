@@ -214,10 +214,10 @@ const CONTENT = {
         },
         stack: ["n8n", "Supabase", "pgvector", "Redis", "Gemini"],
         media: [
+          { src: "assets/projects/chatbot-inicio.webp", alt: { es: "Pantalla de inicio del asistente con sugerencias de consulta", en: "Assistant home screen with suggested queries" }, fit: "contain", bg: "#212121" },
           { src: "assets/projects/chatbot-recomendacion.webp", alt: { es: "El agente recomienda una electiva según el interés del estudiante", en: "The agent recommends an elective based on the student's interest" }, fit: "contain", bg: "#212121" },
           { src: "assets/projects/chatbot-tabla.webp", alt: { es: "Consulta SQL: electivas que se dictan los viernes, con profesor y hora", en: "SQL lookup: electives taught on Fridays, with professor and time" }, fit: "contain", bg: "#212121" },
           { src: "assets/projects/chatbot-electivas-ia.webp", alt: { es: "Búsqueda semántica: electivas relacionadas con inteligencia artificial", en: "Semantic search: electives related to artificial intelligence" }, fit: "contain", bg: "#212121" },
-          { src: "assets/projects/chatbot-inicio.webp", alt: { es: "Pantalla de inicio del asistente con sugerencias de consulta", en: "Assistant home screen with suggested queries" }, fit: "contain", bg: "#212121" },
           { src: "assets/projects/chatbot-saludo.webp", alt: { es: "El agente explica sus dos herramientas: datos exactos y contenido temático", en: "The agent explains its two tools: exact data and topical content" }, fit: "contain", bg: "#212121" },
           { src: "assets/projects/chatbot-agente.webp", alt: { es: "Arquitectura del agente: captura, validación y respuesta", en: "Agent architecture: intake, validation and response" }, fit: "contain", bg: "#141414" },
           { src: "assets/projects/chatbot-ingesta.webp", alt: { es: "Pipeline de ingesta y vectorización de documentos", en: "Document ingestion and vectorization pipeline" }, fit: "contain", bg: "#141414" }
