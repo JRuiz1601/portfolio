@@ -155,9 +155,7 @@ const CONTENT = {
           { src: "assets/projects/pdg-kanban.webp", alt: { es: "Tablero kanban del Líder de Producto con SLA por etapa", en: "Product Lead kanban board with per-stage SLA" } },
           { src: "assets/projects/pdg-segmentos.webp", alt: { es: "Mapa de segmentos de clientes (K-means) dentro de la plataforma", en: "Customer segment map (K-means) inside the platform" } },
           { src: "assets/projects/pdg-costeo.webp", alt: { es: "Costeo de la propuesta con cálculo de márgenes", en: "Proposal costing with margin calculation" } },
-          { src: "assets/projects/pdg-wizard.webp", alt: { es: "Asistente de creación de solicitudes del KAM", en: "KAM request creation wizard" } },
-          { src: "assets/projects/pdg-pca.webp", alt: { es: "Empresas proyectadas en el plano PCA por segmento", en: "Companies projected on the PCA plane by segment" }, fit: "contain", bg: "#FCFCFC" },
-          { src: "assets/projects/pdg-silueta.webp", alt: { es: "Silueta y estabilidad por número de clusters k", en: "Silhouette and stability by number of clusters k" }, fit: "contain", bg: "#FFFFFF" }
+          { src: "assets/projects/pdg-wizard.webp", alt: { es: "Asistente de creación de solicitudes del KAM", en: "KAM request creation wizard" } }
         ],
         repo: "",
         demo: "",
